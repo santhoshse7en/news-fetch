@@ -1,28 +1,25 @@
-[![PyPI Version](https://img.shields.io/pypi/v/news_fetch.svg)](https://pypi.org/project/news_fetch)
-[![Coverage Status](https://coveralls.io/repos/github/santhoshse7en/news_fetch/badge.svg?branch=master)](https://coveralls.io/github/santhoshse7en/news_fetch?branch=master)
-[![License](https://img.shields.io/pypi/l/news_fetch.svg)](https://pypi.python.org/pypi/news_fetch/)
-[![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=latest&style=flat)](https://santhoshse7en.github.io/news_fetch_doc)
+[![PyPI Version](https://img.shields.io/pypi/v/news-fetch.svg)](https://pypi.org/project/news-fetch)
+[![Coverage Status](https://coveralls.io/repos/github/santhoshse7en/news-fetch/badge.svg?branch=master)](https://coveralls.io/github/santhoshse7en/news-fetch?branch=master)
+[![License](https://img.shields.io/pypi/l/news-fetch.svg)](https://pypi.python.org/pypi/news-fetch/)
+[![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=latest&style=flat)](https://santhoshse7en.github.io/news-fetch_doc)
 
-# news_fetch
+# news-fetch
 
-news_fetch scrape all the news related attributes with helps [Google Search](https://www.google.com/) and [Newspaper3K](https://pypi.org/project/newspaper3k/) which reduce the NaN or '' or [] or None values while scraping.
+news-fetch scrape all the news related attributes, was built on top of [news-please](https://pypi.org/project/news-please/) and [Newspaper3K](https://pypi.org/project/newspaper3k/) which helps to reduce most of NaN or '' or [] or 'None' values while scraping. Platform-independent and written in Python 3. This package can be very easily used by programmers and developers to provide access to the New's data to their programs.
 
 | Source         | Link                                         |
 | ---            |  ---                                         |
-| PyPI:          | https://pypi.org/project/news_fetch/             |
-| Repository:    | https://santhoshse7en.github.io/news_fetch/      |
-| Documentation: | https://santhoshse7en.github.io/news_fetch_doc/  |
+| PyPI:          | https://pypi.org/project/news-fetch/             |
+| Repository:    | https://santhoshse7en.github.io/news-fetch/      |
+| Documentation: | https://santhoshse7en.github.io/news-fetch_doc/  |
 
 ## Dependencies
 
 - beautifulsoup4
+- fake_useragent
 - selenium
 - chromedriver-binary
-- fake_useragent
 - pandas
-- pattern
-
-
 
 ## Dependencies Installation
 
@@ -33,10 +30,10 @@ pip install -r requirements.txt
 
 ## Usage
 
-Download it by clicking the green download button here on [Github](https://github.com/santhoshse7en/news_fetch/archive/master.zip). To extract URLs from targeted website call google_crawler function, you only need to parse argument of keyword and newspaper website.
+Download it by clicking the green download button here on [Github](https://github.com/santhoshse7en/news-fetch/archive/master.zip). To extract URLs from targeted website call google_search function, you only need to parse argument of keyword and newspaper link.
 
 ```python
->>> from news_fetch.news import google_search
+>>> from newsfetch.news import google_search
 >>> google = google_search('Alcoholics Anonymous', 'https://timesofindia.indiatimes.com/')
 ```
 
@@ -44,16 +41,16 @@ Download it by clicking the green download button here on [Github](https://githu
 
 ![google](https://user-images.githubusercontent.com/47944792/60381562-67363380-9a74-11e9-99ea-51c27bf08abc.PNG)
 
-To scrape the all news details call news_crawler function
+To scrape the all news details call newspaper function
 
 ```python
->>> from news_fetch.news import newspaper
+>>> from newsfetch.news import newspaper
 >>> news = newspaper('https://www.bbc.co.uk/news/world-48810070')
 ```
 
-**Directory of news_crawler**
+**Directory of news**
 
-![news](https://user-images.githubusercontent.com/47944792/60381950-969b6f00-9a79-11e9-8167-c9cb45033c91.PNG)
+![newsdir](https://user-images.githubusercontent.com/47944792/60564817-c058dc80-9d7e-11e9-9b3e-d0b5a903d972.PNG)
 
 ```python
 >>> news.headline
