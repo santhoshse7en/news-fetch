@@ -1,8 +1,9 @@
 beautifulsoup4
 selenium
-chromedriver-binary==74.0.3729.6.0
+chromedriver-binary
 pandas
 pattern
 fake_useragent
 setuptools
 twine
+unidecode

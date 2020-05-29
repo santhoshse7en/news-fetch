@@ -17,7 +17,7 @@ keywords = ['Newspaper', "news-fetch", "without-api", "google_scraper", 'news_sc
 
 setuptools.setup(
     name="news-fetch",
-    version="0.2.2",
+    version="0.2.3",
     author="M Santhosh Kumar",
     author_email="santhoshse7en@gmail.com",
     description="news-fetch is an open source easy-to-use news extractor and basic nlp (cleaning_text, keywords, summary) comes handy that just works",
@@ -25,7 +25,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://santhoshse7en.github.io/news-fetch/",
     keywords = keywords,
-    install_requires=['beautifulsoup4', 'pandas', 'selenium', 'spacy', 'news-please', 'newspaper3k', 'fake_useragent', 'chromedriver-binary'],
+    install_requires=['beautifulsoup4', 'pandas', 'selenium', 'news-please', 'newspaper3k', 'fake_useragent', 'chromedriver-binary', 'unidecode'],
     packages = setuptools.find_packages(),
     classifiers=['Development Status :: 4 - Beta',
               'Intended Audience :: End Users/Desktop',
