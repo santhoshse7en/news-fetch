@@ -1,8 +1,8 @@
 """A setuptools based setup module.
 See:
 https://packaging.python.org/guides/distributing-packages-using-setuptools/
-https://santhoshse7en.github.io/news_fetch/
-https://santhoshse7en.github.io/news_fetch_doc/
+https://santhoshse7en.github.io/news-fetch/
+https://santhoshse7en.github.io/news-fetch_doc/
 """
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
@@ -11,19 +11,21 @@ from __future__ import print_function
 # Always prefer setuptools over distutils
 import setuptools
 
-keywords = ['Newspaper', "news_fetch", "without-api", "google_scraper", 'news_scraper', 'bs4', 'lxml',]
+keywords = ['Newspaper', "news-fetch", "without-api", "google_scraper", 'news_scraper', 'bs4', 'lxml','news-crawler',
+'news-extractor', 'crawler', 'extractor', 'news', 'news-websites', 'elasticsearch', 'json', 'python', 'nlp', 'data-gathering',
+'news-archive', 'news-articles', 'commoncrawl', 'extract-articles', 'extract-information', 'news-scraper', 'spacy']
 
 setuptools.setup(
-    name="news_fetch",
-    version="0.0.4",
+    name="news-fetch",
+    version="0.2.2",
     author="M Santhosh Kumar",
     author_email="santhoshse7en@gmail.com",
-    description="A Python Package which helps to scrape news details",
+    description="news-fetch is an open source easy-to-use news extractor and basic nlp (cleaning_text, keywords, summary) comes handy that just works",
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",
-    url="https://santhoshse7en.github.io/news_fetch/",
+    url="https://santhoshse7en.github.io/news-fetch/",
     keywords = keywords,
-    install_requires=['beautifulsoup4', 'pandas', 'selenium', 'pattern', 'fake_useragent', 'chromedriver-binary==74.0.3729.6.0'],
+    install_requires=['beautifulsoup4', 'pandas', 'selenium', 'spacy', 'news-please', 'newspaper3k', 'fake_useragent', 'chromedriver-binary'],
     packages = setuptools.find_packages(),
     classifiers=['Development Status :: 4 - Beta',
               'Intended Audience :: End Users/Desktop',
