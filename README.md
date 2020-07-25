@@ -54,7 +54,7 @@ pip install -r requirements.txt
 Download it by clicking the green download button here on [Github](https://github.com/santhoshse7en/news-fetch/archive/master.zip). To extract URLs from targeted website call google_search function, you only need to parse argument of keyword and newspaper link.
 
 ```python
->>> from newsfetch.news import google_search
+>>> from newsfetch.google import google_search
 >>> google = google_search('Alcoholics Anonymous', 'https://timesofindia.indiatimes.com/')
 ```
 
