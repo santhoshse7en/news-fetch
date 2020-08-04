@@ -75,7 +75,7 @@ class newspaper:
         """
         :returns: The News Language
         """
-        self.image_url = catch('None', lambda: newsplease.language)
+        self.language = catch('None', lambda: newsplease.language)
 
         """
         :returns: The News Publisher
@@ -126,6 +126,7 @@ class newspaper:
                                                'date_publish': self.date_publish,
                                                'date_modify': self.date_modify,
                                                'date_download': self.date_download,
+                                               'language': self.language,
                                                'image_url': self.image_url,
                                                'filename': self.filename,
                                                'description': self.description,
