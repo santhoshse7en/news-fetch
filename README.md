@@ -2,7 +2,7 @@
 [![License](https://img.shields.io/pypi/l/news-fetch.svg?style=flat-square)](https://pypi.python.org/pypi/news-fetch/)
 [![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=latest&style=flat-square)](https://santhoshse7en.github.io/news-fetch_doc)
 
-# news-fetch
+# news-fetch;the hindu_indian express
 
 <img align="right" height="128px" width="128px" src="https://raw.githubusercontent.com/fhamborg/news-please/master/misc/logo/logo-256.png" />
 
@@ -31,7 +31,7 @@ I built this to reduce most of NaN or '' or [] or 'None' values while scraping f
 ## Extracted information
 news-please extracts the following attributes from news articles. Also, have a look at an [examplary json file](https://github.com/santhoshse7en/news-fetch/blob/master/newsfetch/example/sample.json) extracted by news-please.
 * headline
-* name(s) of author(s)
+* name(s) of author(s)_the_hindu,indian_express
 * publication date
 * publication
 * category
@@ -40,7 +40,7 @@ news-please extracts the following attributes from news articles. Also, have a l
 * summary
 * keyword
 * url
-* language
+* language_english
 
 ## Dependencies Installation
 
