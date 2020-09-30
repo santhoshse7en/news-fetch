@@ -25,7 +25,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://santhoshse7en.github.io/news-fetch/",
     keywords = keywords,
-    install_requires=['beautifulsoup4', 'pandas', 'selenium', 'news-please', 'newspaper3k', 'fake_useragent', 'chromedriver-binary', 'unidecode'],
+    install_requires=['beautifulsoup4', 'pandas', 'selenium', 'news-please', 'newspaper3k', 'fake_useragent', 'chromedriver-binary', 'unidecode', 'twine', 'pattern'],
     packages = setuptools.find_packages(),
     classifiers=['Development Status :: 4 - Beta',
               'Intended Audience :: End Users/Desktop',
