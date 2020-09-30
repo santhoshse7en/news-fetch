@@ -4,7 +4,7 @@
 
 # news-fetch
 
-<img align="right" height="128px" width="128px" src="https://raw.githubusercontent.com/fhamborg/news-please/master/misc/logo/logo-256.png" />
+<img align="left" height="128px" width="128px" src="https://raw.githubusercontent.com/fhamborg/news-please/master/misc/logo/logo-256.png" />
 
 news-fetch is an open source, easy-to-use news crawler that extracts structured information from almost any news website. It can follow recursively internal hyperlinks and read RSS feeds to fetch both most recent and also old, archived articles. You only need to provide the root URL of the news website to crawl it completely. news-fetch combines the power of multiple state-of-the-art libraries and tools, such as [news-please](https://github.com/fhamborg/news-please) - [Felix Hamborg](https://www.linkedin.com/in/felixhamborg/) and [Newspaper3K](https://github.com/codelucas/newspaper/) - [Lucas (欧阳象) Ou-Yang](https://www.linkedin.com/in/lucasouyang/). This package consist of both features provided my Felix's work and Lucas' work.
 
@@ -42,7 +42,7 @@ news-please extracts the following attributes from news articles. Also, have a l
 * url
 * language
 
-## Dependencies Installation
+## Dependencies of Installation
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install following
 ```bash
