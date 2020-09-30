@@ -1,4 +1,4 @@
-beautifulsoup4
+beautiful_soup_4
 selenium
 chromedriver-binary
 pandas
