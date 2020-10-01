@@ -1,3 +1,4 @@
+#news.py
 from newsfetch.helpers import (author, catch, category, date, news_article,
                                publisher, unicode)
 from newsfetch.utils import Article, BeautifulSoup, NewsPlease, get, unquote
