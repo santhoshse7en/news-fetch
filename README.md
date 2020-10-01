@@ -17,7 +17,7 @@ I built this to reduce most of NaN or '' or [] or 'None' values while scraping f
 | Repository:    | https://santhoshse7en.github.io/news-fetch/      |
 | Documentation: | https://santhoshse7en.github.io/news-fetch_doc/  |
 
-## Dependencies
+## Prerequistic:
 
 - news-please
 - newspaper3k
