@@ -12,7 +12,7 @@ I built this to reduce most of NaN or '' or [] or 'None' values while scraping f
 
 
 | Source         | Link                                             |
-| ---            |  ---                                             |
+| ----            |  ----                                             |
 | PyPI:          | https://pypi.org/project/news-fetch/             |
 | Repository:    | https://santhoshse7en.github.io/news-fetch/      |
 | Documentation: | https://santhoshse7en.github.io/news-fetch_doc/  |
