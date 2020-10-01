@@ -1,3 +1,4 @@
+#File Imports
 from newsfetch.helpers import (get_chrome_web_driver, get_web_driver_options,
                                set_automation_as_head_less,
                                set_browser_as_incognito,
@@ -5,7 +6,7 @@ from newsfetch.helpers import (get_chrome_web_driver, get_web_driver_options,
 from newsfetch.utils import (BeautifulSoup, Options, UserAgent, get, re,
                              webdriver)
 
-
+#Defining a class named google_search
 class google_search:
 
     def __init__(self, keyword, newspaper_url):
@@ -31,9 +32,9 @@ class google_search:
 
         try:
 
-            url_list = []
+            url_list = [] #list url_list
 
-            if len(driver.find_elements_by_xpath('//div[@id="result-stats"]')) != 0:
+            if len(driver.find_elements_by_xpath('//div[@id="result-stats"]')) != 0: #condiition
 
                 options = get_web_driver_options()
                 set_automation_as_head_less(options)
@@ -48,14 +49,14 @@ class google_search:
 
             url_list = []
 
-            if max_pages != 0:
+            if max_pages != 0: #condtion
 
                 browser = webdriver.Chrome(chrome_options=options)
                 driver.get(url)
 
                 index = 0
-
-                while True:
+  
+                while True: #loop
                     try:
                         index += 1
                         links = driver.find_elements_by_xpath('//div[@class="r"]/a')
