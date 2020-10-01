@@ -1,3 +1,4 @@
+logr-An Amazing Project
 [![PyPI version](https://img.shields.io/pypi/v/news-fetch.svg?style=flat-square)](https://pypi.org/project/news-fetch)
 [![License](https://img.shields.io/pypi/l/news-fetch.svg?style=flat-square)](https://pypi.python.org/pypi/news-fetch/)
 [![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=latest&style=flat-square)](https://santhoshse7en.github.io/news-fetch_doc)
@@ -58,7 +59,7 @@ Download it by clicking the green download button here on [Github](https://githu
 >>> google = google_search('Alcoholics Anonymous', 'https://timesofindia.indiatimes.com/')
 ```
 
-**Directory of google search results urls**
+**Directory of Google search results URLs**
 
 ![google](https://user-images.githubusercontent.com/47944792/60381562-67363380-9a74-11e9-99ea-51c27bf08abc.PNG)
 
@@ -69,7 +70,7 @@ To scrape the all news details call newspaper function
 >>> news = newspaper('https://www.bbc.co.uk/news/world-48810070')
 ```
 
-**Directory of news**
+**Directory of News**
 
 ![newsdir](https://user-images.githubusercontent.com/47944792/60564817-c058dc80-9d7e-11e9-9b3e-d0b5a903d972.PNG)
 
@@ -79,7 +80,7 @@ To scrape the all news details call newspaper function
 'g20 summit: trump and xi agree to restart us china trade talks'
 ```
 
-## Contributing
+## Contribution
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
