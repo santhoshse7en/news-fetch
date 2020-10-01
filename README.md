@@ -46,7 +46,7 @@ news-please extracts the following attributes from news articles. Also, have a l
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install following
 ```bash
-pip install -r requirements.txt
+pip installer requirements.txt
 ```
 
 ## Usage
