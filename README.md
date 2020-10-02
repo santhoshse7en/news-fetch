@@ -2,11 +2,12 @@
 [![License](https://img.shields.io/pypi/l/news-fetch.svg?style=flat-square)](https://pypi.python.org/pypi/news-fetch/)
 [![Documentation Status](https://readthedocs.org/projects/pip/badge/?version=latest&style=flat-square)](https://santhoshse7en.github.io/news-fetch_doc)
 
-# news-fetch
+# news-fetch(Open_source):-
 
 <img align="right" height="128px" width="128px" src="https://raw.githubusercontent.com/fhamborg/news-please/master/misc/logo/logo-256.png" />
 
-news-fetch is an open source, easy-to-use news crawler that extracts structured information from almost any news website. It can follow recursively internal hyperlinks and read RSS feeds to fetch both most recent and also old, archived articles. You only need to provide the root URL of the news website to crawl it completely. news-fetch combines the power of multiple state-of-the-art libraries and tools, such as [news-please](https://github.com/fhamborg/news-please) - [Felix Hamborg](https://www.linkedin.com/in/felixhamborg/) and [Newspaper3K](https://github.com/codelucas/newspaper/) - [Lucas (欧阳象) Ou-Yang](https://www.linkedin.com/in/lucasouyang/). This package consist of both features provided my Felix's work and Lucas' work.
+news-fetch is an open source and easy-to-use news crawler that extracts structured information from almost any news website. It can follow recursively internal hyperlinks and read RSS feeds to fetch both most recent and also old, archived articles. You only need to provide the root URL of the news website to crawl it completely. news-fetch combines the power of multiple state-of-the-art libraries and tools, such as [news-please](https://github.com/fhamborg/news-please) - [Felix Hamborg](https://www.linkedin.com/in/felixhamborg/) and [Newspaper3K](https://github.com/codelucas/newspaper/) - [Lucas (欧阳象) Ou-Yang](https://www.linkedin.com/in/lucasouyang/).
+# This package consist of both features provided my Felix's work and Lucas' work.
 
 I built this to reduce most of NaN or '' or [] or 'None' values while scraping for some newswesites. Platform-independent and written in Python 3. This package can be very easily used by programmers and developers to provide access to the news data to their programs.
 
@@ -17,7 +18,7 @@ I built this to reduce most of NaN or '' or [] or 'None' values while scraping f
 | Repository:    | https://santhoshse7en.github.io/news-fetch/      |
 | Documentation: | https://santhoshse7en.github.io/news-fetch_doc/  |
 
-## Dependencies
+## Dependencies-
 
 - news-please
 - newspaper3k
@@ -28,8 +29,9 @@ I built this to reduce most of NaN or '' or [] or 'None' values while scraping f
 - fake_useragent
 - pandas
 
-## Extracted information
-news-please extracts the following attributes from news articles. Also, have a look at an [examplary json file](https://github.com/santhoshse7en/news-fetch/blob/master/newsfetch/example/sample.json) extracted by news-please.
+## Extracted information-
+news-please extracts the following attributes from news articles.
+Also, have a look at an [examplary json file](https://github.com/santhoshse7en/news-fetch/blob/master/newsfetch/example/sample.json) extracted by news-please.
 * headline
 * name(s) of author(s)
 * publication date
@@ -42,16 +44,16 @@ news-please extracts the following attributes from news articles. Also, have a l
 * url
 * language
 
-## Dependencies Installation
+## Dependencies Installation-
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install following
+* Use the package manager [pip](https://pip.pypa.io/en/stable/) to install following
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+## Usage-
 
-Download it by clicking the green download button here on [Github](https://github.com/santhoshse7en/news-fetch/archive/master.zip). To extract URLs from targeted website call google_search function, you only need to parse argument of keyword and newspaper link.
+Download it by just clicking the green download button here on [Github](https://github.com/santhoshse7en/news-fetch/archive/master.zip). To extract URLs from targeted website call google_search function, you only need to parse argument of keyword and newspaper link.
 
 ```python
 >>> from newsfetch.google import google_search
@@ -82,7 +84,7 @@ To scrape the all news details call newspaper function
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
+# Note
 Please make sure to update tests as appropriate.
 
 ## License
