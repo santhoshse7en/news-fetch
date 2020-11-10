@@ -29,7 +29,7 @@ I built this to reduce most of NaN or '' or [] or 'None' values while scraping f
 - pandas
 
 ## Extracted information
-news-please extracts the following attributes from news articles. Also, have a look at an [examplary json file](https://github.com/santhoshse7en/news-fetch/blob/master/newsfetch/example/sample.json) extracted by news-please.
+news-fetch extracts the following attributes from news articles. Also, have a look at an [examplary json file](https://github.com/santhoshse7en/news-fetch/blob/master/newsfetch/example/sample.json) extracted by news-please.
 * headline
 * name(s) of author(s)
 * publication date
