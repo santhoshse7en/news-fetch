@@ -11,11 +11,11 @@ news-fetch is an open source, easy-to-use news crawler that extracts structured 
 I built this to reduce most of NaN or '' or [] or 'None' values while scraping for some news websites. Platform-independent and written in Python 3. This package can be very easily used by programmers and developers to provide access to the news data to their programs.
 
 
-| Source         | Link                                                               |
-| ---            |  ---                                                               |
-| PyPI:          | https://pypi.org/project/news-fetch/                               |
-| Repository:    | https://santhoshse7en.github.io/news-fetch/                        |
-| Documentation: | https://santhoshse7en.github.io/news-fetch_doc/ (Not Yet Created!) |
+| Source         | Link                                                                   |
+| ---            |  ---                                                                   |
+| PyPI:          | https://pypi.org/project/news-fetch/                                   |
+| Repository:    | https://santhoshse7en.github.io/news-fetch/                            |
+| Documentation: | https://santhoshse7en.github.io/news-fetch_doc/ (**Not Yet Created!**) |
 
 ## Dependencies
 
