@@ -59,9 +59,16 @@ Download it by clicking the green download button here on [Github](https://githu
 >>> google = google_search('Alcoholics Anonymous', 'https://timesofindia.indiatimes.com/')
 ```
 
+Use the `urls` attribute to get the links of all the news articles which have been scraped. 
+
+```python
+>>> google.urls
+```
+
 **Directory of google search results urls**
 
-![google](https://user-images.githubusercontent.com/47944792/60381562-67363380-9a74-11e9-99ea-51c27bf08abc.PNG)
+![google](https://user-images.githubusercontent.com/47944792/88402193-68a56d00-cde8-11ea-8f26-9f7bf19359b2.PNG)
+
 
 To scrape the all news details call newspaper function
 
