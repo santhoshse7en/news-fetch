@@ -24,7 +24,7 @@ I built this to reduce most of NaN or '' or [] or 'None' values while scraping f
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
 - [fake_useragent](https://pypi.org/project/fake-useragent/)
 - [selenium](https://pypi.org/project/selenium/)
-- [chromedriver-binary-auto](https://pypi.org/project/chromedriver-binary-auto/)
+- [chromedriver-binary](https://pypi.org/project/chromedriver-binary/)
 - [pandas](https://pypi.org/project/pandas/)
 
 ## Extracted information

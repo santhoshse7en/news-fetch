@@ -2,6 +2,7 @@ import json
 import re
 import sys
 import time
+from urllib.parse import unquote
 
 import chromedriver_binary
 import pandas as pd
@@ -14,5 +15,3 @@ from newsplease import NewsPlease
 from requests import get
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from urllib.parse import unquote
-
