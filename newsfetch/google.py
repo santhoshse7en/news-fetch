@@ -3,7 +3,7 @@ from newsfetch.helpers import (get_chrome_web_driver, get_web_driver_options,
                                set_browser_as_incognito,
                                set_ignore_certificate_error)
 from newsfetch.utils import (BeautifulSoup, Options, UserAgent, get, re,
-                             webdriver)
+                             webdriver, time, sys)
 
 
 class google_search:

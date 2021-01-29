@@ -19,14 +19,13 @@ I built this to reduce most of NaN or '' or [] or 'None' values while scraping f
 
 ## Dependencies
 
-- news-please
-- newspaper3k
-- beautifulsoup4
-- fake_useragent
-- selenium
-- chromedriver-binary
-- fake_useragent
-- pandas
+- [news-please](https://pypi.org/project/news-please/)
+- [newspaper3k](https://pypi.org/project/newspaper3k/)
+- [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
+- [fake_useragent](https://pypi.org/project/fake-useragent/)
+- [selenium](https://pypi.org/project/selenium/)
+- [chromedriver-binary-auto](https://pypi.org/project/chromedriver-binary-auto/)
+- [pandas](https://pypi.org/project/pandas/)
 
 ## Extracted information
 news-fetch extracts the following attributes from news articles. Also, have a look at an [examplary JSON file](https://github.com/santhoshse7en/news-fetch/blob/master/newsfetch/example/sample.json) extracted by news-please.

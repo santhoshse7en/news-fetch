@@ -1,6 +1,6 @@
 beautifulsoup4
 selenium
-chromedriver-binary
+chromedriver-binary-auto
 pandas
 pattern
 fake_useragent
