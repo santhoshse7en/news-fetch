@@ -16,7 +16,7 @@ keywords = ['Newspaper', "news-fetch", "without-api", "google_scraper", 'news_sc
 
 setuptools.setup(
     name="news-fetch",
-    version="0.2.7",
+    version="0.2.8",
     author="M Santhosh Kumar",
     author_email="santhoshse7en@gmail.com",
     description="news-fetch is an open source easy-to-use news extractor and basic nlp (cleaning_text, keywords, summary) comes handy that just works",
