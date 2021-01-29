@@ -17,29 +17,22 @@ class google_search:
         random_headers = {'User-Agent': UserAgent().random,
                           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
 
-        self.search_term = f'{self.keyword} site:{self.newspaper_url}'
+        self.search_term = '"{}" site:{}'.format(self.keyword, self.newspaper_url)
 
-        url = f"https://www.google.com/search?q={'+'.join(self.search_term.split())}"
-
+        url = "https://www.google.com/search?q={}".format('+'.join(self.search_term.split()))
+        
         options = get_web_driver_options()
         set_automation_as_head_less(options)
         set_ignore_certificate_error(options)
         set_browser_as_incognito(options)
         driver = get_chrome_web_driver(options)
         driver.get(url)
+        
+        url_list = []
 
         try:
 
-            url_list = []
-
             if len(driver.find_elements_by_xpath('//div[@id="result-stats"]')) != 0:
-
-                options = get_web_driver_options()
-                set_automation_as_head_less(options)
-                set_ignore_certificate_error(options)
-                set_browser_as_incognito(options)
-                driver = get_chrome_web_driver(options)
-                driver.get(url)
 
                 results = driver.find_elements_by_xpath(
                     '//div[@id="result-stats"]')[0].text
@@ -47,32 +40,26 @@ class google_search:
                 max_pages = round(
                     int(int(''.join(i for i in results if i.isdigit())) / 10))
 
-            url_list = []
-
             if max_pages != 0:
-
-                browser = webdriver.Chrome(chrome_options=options)
-                driver.get(url)
-
+                
                 index = 0
 
                 while True:
                     try:
                         index += 1
                         links = driver.find_elements_by_xpath(
-                            '//div[@class="r"]/a')
+                            '//div[@class="yuRUbf"]/a')
                         linky = [link.get_attribute('href') for link in links]
                         url_list.extend(linky)
-                        if index == max_pages:
+                        try:
+                            driver.find_element_by_xpath('//*[@id="pnnext"]/span[2]').click()
+                        except:
                             break
-                        driver.find_element_by_xpath(
-                            '//*[@id="pnnext"]/span[2]').click()
                         time.sleep(2)
-                        sys.stdout.write('\r%s : %s\r' %
-                                         (str(index), str(max_pages)))
+                        sys.stdout.write('\r No.of pages parsed : %s\r' % (str(index)))
                         sys.stdout.flush()
                     except:
-                        pass
+                        continue
 
                 driver.quit()
             else:
