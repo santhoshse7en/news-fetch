@@ -111,6 +111,10 @@ class newspaper:
         :returns: source domain
         """
         self.source_domain = catch('None', lambda: newsplease.source_domain)
+        """
+        :returns: The Source Favicon URL
+        """
+        self.source_favicon_url = catch('None', lambda: article.meta_favicon)
 
         """
         :returns: description
@@ -133,6 +137,7 @@ class newspaper:
                                                'publication': self.publication,
                                                'category': self.category,
                                                'source_domain': self.source_domain,
+                                               'source_favicon_url': self.source_favicon_url,
                                                'article': self.article,
                                                'summary': self.summary,
                                                'keyword': self.keywords,
