@@ -31,7 +31,7 @@ def dataframe_data(df):
 
 
 def get_chrome_web_driver(options):
-    return webdriver.Chrome(chrome_options=options)
+    return webdriver.Chrome(options=options)
 
 
 def get_web_driver_options():
