@@ -28,6 +28,7 @@ def dataframe_data(df):
 def get_chrome_web_driver(options):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
     return webdriver.Chrome(options=options)
 
 def get_web_driver_options():
