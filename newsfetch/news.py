@@ -1,141 +1,152 @@
-from newsfetch.helpers import (author, catch, category, date, news_article,
-                               publisher, unicode)
-from newsfetch.utils import Article, BeautifulSoup, NewsPlease, get, unquote
+from newspaper_handler import ArticleHandler
+from news_please_handler import NewsPleaseHandler
+from soup_handler import SoupHandler
 
+class Newspaper:
+    """Class to scrape and extract information from a news article."""
 
-class newspaper:
+    def __init__(self, url: str) -> None:
+        """Initialize the Newspaper object with the given URL."""
+        self.url = url
+        self.__news_please = NewsPleaseHandler(url)
+        self.__article = ArticleHandler(url)
+        self.__soup = SoupHandler(url)
 
-    def __init__(self, uri: str) -> bool:
+        # Validate initialization
+        self.__validate_initialization()
 
-        self.uri = uri
+        # If article is available, download and parse it
+        if self.__article.is_valid():
+            self.__article.download_and_parse()
 
-        """
-        :return: Initializing the values with 'None', In case if the below values not able to extracted from the target uri
-        """
+        # Extract data attributes
+        self.headline = self.__extract_headline()
+        self.article = self.__extract_article()
+        self.authors = self.__extract_authors()
+        self.date_publish = self.__extract_date_publish()
+        self.date_modify = self.__extract_date_modify()
+        self.date_download = self.__extract_date_download()
+        self.image_url = self.__extract_image_url()
+        self.filename = self.__extract_filename()
+        self.title_page = self.__extract_title_page()
+        self.title_rss = self.__extract_title_rss()
+        self.language = self.__extract_language()
+        self.publication = self.__extract_publication()
+        self.category = self.__extract_category()
+        self.keywords = self.__extract_keywords()
+        self.summary = self.__extract_summary()
+        self.source_domain = self.__extract_source_domain()
+        self.source_favicon_url = self.__extract_source_favicon_url()
+        self.description = self.__extract_description()
 
-        # NewsPlease Scraper
-        newsplease = catch(
-            'None', lambda: NewsPlease.from_url(self.uri, timeout=6))
+        self.get_dict = self.__serialize()
 
-        # Newspaper3K Scraper
-        article = catch('None', lambda: Article(self.uri, timeout=6))
-        catch('None', lambda: article.download())
-        catch('None', lambda: article.parse())
-        catch('None', lambda: article.nlp())
+    def __validate_initialization(self):
+        """Raise an error if no valid data is found."""
+        if not (self.__news_please.is_valid() or self.__article.is_valid() or self.__soup.is_valid()):
+            raise ValueError("Sorry, the page you are looking for doesn't exist.")
 
-        soup = catch('None', lambda: BeautifulSoup(get(self.uri).text, 'lxml'))
+    @staticmethod
+    def __extract(*sources):
+        """Generic method to extract the first valid value from provided sources."""
+        for source in sources:
+            value = source  # Accessing the property directly
+            if value:
+                return value
+        return None
 
-        if all([newsplease, article, soup]) == None:
-            raise ValueError(
-                "Sorry, the page you are looking for doesn't exist'")
+    def __extract_authors(self):
+        """Extract the authors from the article or the news source."""
+        return self.__extract(self.__news_please.authors, self.__article.authors, self.__soup.authors)
 
-        """
-        :returns: The News Article
-        """
-        self.article = catch('None', lambda: news_article(article.text) if article.text !=
-                             None else news_article(newsplease.maintext) if newsplease.maintext != None else 'None')
+    def __extract_date_publish(self):
+        """Extract the publication date of the article."""
+        return self.__extract(self.__news_please.date_publish, self.__article.date_publish, self.__soup.date_publish)
 
-        """
-        :returns: The News Authors
-        """
-        self.authors = catch('list', lambda: newsplease.authors if len(newsplease.authors) != 0 else article.authors if len(
-            article.authors) != 0 else unicode([author(soup)]) if author(soup) != None else ['None'])
+    def __extract_date_modify(self):
+        """Extract the modification date of the article."""
+        return self.__news_please.date_modify
 
-        """
-        :returns: The News Published, Modify, Download Date
-        """
-        self.date_publish = catch('None', lambda: str(newsplease.date_publish) if str(newsplease.date_publish) != 'None' else article.meta_data[
-                                  'article']['published_time'] if article.meta_data['article']['published_time'] != None else date(soup) if date(soup) != None else 'None')
+    def __extract_date_download(self):
+        """Extract the date the article was downloaded."""
+        return self.__news_please.date_download
 
-        self.date_modify = catch('None', lambda: str(newsplease.date_modify))
+    def __extract_image_url(self):
+        """Extract the URL of the article's image."""
+        return self.__news_please.image_url
 
-        self.date_download = catch(
-            'None', lambda: str(newsplease.date_download))
+    def __extract_filename(self):
+        """Extract the filename of the article."""
+        return self.__news_please.filename
 
-        """
-        :returns: The News Image URL
-        """
-        self.image_url = catch('None', lambda: newsplease.image_url)
+    def __extract_article(self):
+        """Extract the article content."""
+        return self.__extract(self.__news_please.article, self.__article.article)
 
-        """
-        :returns: The News filename
-        """
-        self.filename = catch('None', lambda: unquote(newsplease.filename))
+    def __extract_title_page(self):
+        """Extract the title of the article page."""
+        return self.__news_please.title_page
 
-        """
-        :returns: The News title page
-        """
-        self.title_page = catch('None', lambda: newsplease.title_page)
+    def __extract_title_rss(self):
+        """Extract the RSS title of the article."""
+        return self.__news_please.title_rss
 
-        """
-        :returns: The News title rss
-        """
-        self.title_rss = catch('None', lambda: newsplease.title_rss)
+    def __extract_language(self):
+        """Extract the language of the article."""
+        return self.__news_please.language
 
-        """
-        :returns: The News Language
-        """
-        self.language = catch('None', lambda: newsplease.language)
+    def __extract_publication(self):
+        """Extract the publication name of the article."""
+        return self.__extract(self.__article.publication, self.__soup.publisher)
 
-        """
-        :returns: The News Publisher
-        """
-        self.publication = catch('None', lambda: article.meta_data['og']['site_name'] if article.meta_data['og']['site_name'] != None else publisher(
-            soup) if publisher(soup) != None else self.uri.split('/')[2] if self.uri.split('/')[2] != None else 'None')
+    def __extract_category(self):
+        """Extract the category of the article."""
+        return self.__extract(self.__article.category, self.__soup.category)
 
-        """
-        :returns: The News Category
-        """
-        meta_check = any(word in 'section' or 'category' for word in list(
-            article.meta_data.keys()))
-        self.category = catch('None', lambda: article.meta_data['category'] if meta_check == True and article.meta_data['category'] != {} else article.meta_data['section'] if meta_check ==
-                              True and article.meta_data['section'] != {} else article.meta_data['article']['section'] if meta_check == True and article.meta_data['article']['section'] != {} else category(soup) if category(soup) != None else 'None')
+    def __extract_headline(self):
+        """Extract the headline of the article."""
+        return self.__extract(self.__news_please.headline, self.__article.headline)
 
-        """
-        :returns: headlines
-        """
-        self.headline = catch('None', lambda: unicode(article.title) if article.title != None else unicode(
-            newsplease.title) if newsplease.title != None else 'None')
+    def __extract_keywords(self):
+        """Extract the keywords associated with the article."""
+        return self.__article.keywords or []
 
-        """
-        :returns: keywords
-        """
-        self.keywords = catch('list', lambda: article.keywords)
+    def __extract_summary(self):
+        """Extract the summary of the article."""
+        return self.__article.summary
 
-        """
-        :returns: summary
-        """
-        self.summary = catch('None', lambda: news_article(article.summary))
+    def __extract_source_domain(self):
+        """Extract the source domain of the article."""
+        return self.__news_please.source_domain
 
-        """
-        :returns: source domain
-        """
-        self.source_domain = catch('None', lambda: newsplease.source_domain)
+    def __extract_source_favicon_url(self):
+        """Extract the source favicon URL of the article."""
+        return self.__article.meta_favicon
 
-        """
-        :returns: description
-        """
-        self.description = catch('None', lambda: news_article(article.meta_description) if article.meta_description != '' else news_article(
-            article.meta_data['description']) if article.meta_data['description'] != {} else news_article(newsplease.description) if newsplease.description != None else None)
+    def __extract_description(self):
+        """Extract the description of the article."""
+        return self.__extract(self.__news_please.summary, self.__article.summary)
 
-        """
-        :returns: serializable_dict
-        """
-        self.get_dict = catch('dict', lambda: {'headline': self.headline,
-                                               'author': self.authors,
-                                               'date_publish': self.date_publish,
-                                               'date_modify': self.date_modify,
-                                               'date_download': self.date_download,
-                                               'language': self.language,
-                                               'image_url': self.image_url,
-                                               'filename': self.filename,
-                                               'description': self.description,
-                                               'publication': self.publication,
-                                               'category': self.category,
-                                               'source_domain': self.source_domain,
-                                               'article': self.article,
-                                               'summary': self.summary,
-                                               'keyword': self.keywords,
-                                               'title_page': self.title_page,
-                                               'title_rss': self.title_rss,
-                                               'url': self.uri})
+    def __serialize(self):
+        """Return a dictionary representation of the article's data."""
+        return {
+            "headline": self.headline,
+            "author": self.authors,
+            "date_publish": self.date_publish,
+            "date_modify": self.date_modify,
+            "date_download": self.date_download,
+            "language": self.language,
+            "image_url": self.image_url,
+            "filename": self.filename,
+            "description": self.description,
+            "publication": self.publication,
+            "category": self.category,
+            "source_domain": self.source_domain,
+            "source_favicon_url": self.source_favicon_url,
+            "article": self.article,
+            "summary": self.summary,
+            "keyword": self.keywords,
+            "title_page": self.title_page,
+            "title_rss": self.title_rss,
+            "url": self.url
+        }
