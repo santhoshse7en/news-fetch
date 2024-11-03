@@ -20,7 +20,7 @@ keywords = [
 
 setuptools.setup(
     name="news-fetch",
-    version="0.2.9",
+    version="0.3.0",
     author="M Santhosh Kumar",
     author_email="santhoshse7en@gmail.com",
     description="news-fetch is an open-source, easy-to-use news extractor with basic NLP features (cleaning text, keywords, summary) that just works.",

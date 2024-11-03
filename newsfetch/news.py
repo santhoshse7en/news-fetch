@@ -1,6 +1,6 @@
-from newspaper_handler import ArticleHandler
-from news_please_handler import NewsPleaseHandler
-from soup_handler import SoupHandler
+from newsfetch.newspaper_handler import ArticleHandler
+from newsfetch.news_please_handler import NewsPleaseHandler
+from newsfetch.soup_handler import SoupHandler
 
 class Newspaper:
     """Class to scrape and extract information from a news article."""

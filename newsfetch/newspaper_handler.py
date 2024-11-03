@@ -1,6 +1,6 @@
 from newspaper import Article
 
-from helpers import clean_text, extract_keywords, summarize_article, unicode
+from newsfetch.helpers import clean_text, extract_keywords, summarize_article, unicode
 
 
 class ArticleHandler:

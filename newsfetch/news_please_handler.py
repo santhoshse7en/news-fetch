@@ -1,7 +1,7 @@
 from urllib.parse import unquote
 
 from newsplease import NewsPlease
-from helpers import clean_text, unicode
+from newsfetch.helpers import clean_text, unicode
 
 
 class NewsPleaseHandler:
