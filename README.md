@@ -21,10 +21,7 @@ I built this tool to minimize NaN or empty values when scraping data from variou
 - [news-please](https://pypi.org/project/news-please/)
 - [newspaper3k](https://pypi.org/project/newspaper3k/)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
-- [fake_useragent](https://pypi.org/project/fake-useragent/)
 - [selenium](https://pypi.org/project/selenium/)
-- [chromedriver-binary](https://pypi.org/project/chromedriver-binary/)
-- [pandas](https://pypi.org/project/pandas/)
 
 ## Extracted Information
 
