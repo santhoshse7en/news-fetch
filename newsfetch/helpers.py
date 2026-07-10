@@ -8,14 +8,14 @@ def unicode(text: str) -> str:
     return unidecode(text).strip()
 
 
-def clean_text(article):
+def clean_text(article: str) -> str:
     """Clean the article text by removing extra whitespace and newlines."""
     # Remove extra whitespace and newlines
     cleaned_article = re.sub(r'\s+', ' ', article).strip()
     return cleaned_article
 
 
-def extract_keywords(article):
+def extract_keywords(article: str) -> list[tuple[str, int]]:
     """Extract keywords from the article."""
     # Split the article into words
     words = re.findall(r'\b\w+\b', article.lower())
@@ -30,7 +30,7 @@ def extract_keywords(article):
     return sorted(keywords.items(), key=lambda x: x[1], reverse=True)
 
 
-def summarize_article(article, max_sentences=3):
+def summarize_article(article: str, max_sentences: int = 3) -> str:
     """Summarize the article by extracting the first few sentences."""
     sentences = re.split(r'(?<=[.!?]) +', article)
     summary = ' '.join(sentences[:max_sentences])  # Take the first few sentences
