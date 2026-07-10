@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "news-fetch"
+version = "0.4.0"
+description = "news-fetch is an open-source, easy-to-use news extractor with basic NLP features (cleaning text, keywords, summary) that just works."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [
+    { name = "M Santhosh Kumar", email = "santhoshse7en@gmail.com" },
+]
+keywords = [
+    "newspaper4k", "news-fetch", "without-api", "news_scraper",
+    "bs4", "lxml", "news-crawler", "news-extractor", "crawler", "extractor",
+    "news", "news-websites", "json", "python", "nlp",
+    "data-gathering", "news-archive", "news-articles",
+    "extract-articles", "extract-information", "news-scraper",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "beautifulsoup4>=4.15",
+    "requests>=2.34",
+    "newspaper4k>=0.9.3.1",
+    "lxml-html-clean>=0.4,<0.4.3",
+    "Unidecode>=1.4",
+]
+
+[project.optional-dependencies]
+dev = ["build", "setuptools", "twine"]
+
+[project.urls]
+Homepage = "https://santhoshse7en.github.io/news-fetch/"
+Documentation = "https://santhoshse7en.github.io/news-fetch_doc/"
+Repository = "https://github.com/santhoshse7en/news-fetch"
+Issues = "https://github.com/santhoshse7en/news-fetch/issues"
+
+[tool.setuptools.packages.find]
+include = ["newsfetch*"]
+
+[tool.setuptools.package-data]
+newsfetch = ["example/*.json", "py.typed"]

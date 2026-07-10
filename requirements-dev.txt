@@ -1,0 +1,4 @@
+-r requirements.txt
+build==1.5.1
+setuptools==83.0.0
+twine==6.2.0

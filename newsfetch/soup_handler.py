@@ -23,102 +23,120 @@ class SoupHandler:
         """Check if the BeautifulSoup instance is valid."""
         return self.__soup is not None
 
-    def extract_metadata(self, metadata_type: str):
-        """Extract specified metadata from the HTML soup ("author", "date", "category", or "publisher")."""
-        if metadata_type not in ["author", "date", "category", "publisher"]:
-            raise ValueError("metadata_type must be 'author', 'date', 'category', or 'publisher'.")
+    def extract_metadata(self, metadata_type: str) -> str | list[str] | None:
+        """Extract specified metadata from the JSON-LD in the HTML soup.
+
+        metadata_type: one of "author", "date", "date_modify", "category", "publisher".
+        Returns None (or an empty list for "author") when nothing is found.
+        """
+        valid_types = ["author", "date", "date_modify", "category", "publisher"]
+        if metadata_type not in valid_types:
+            raise ValueError(f"metadata_type must be one of {valid_types}.")
 
         if not self.is_valid():
-            return "N/A"  # Return if the soup is not valid
+            return [] if metadata_type == "author" else None
 
         meta_elements = self.__soup.select("script[type='application/ld+json']")
         for i in range(min(3, len(meta_elements))):  # Limit to 3 attempts
             try:
                 meta = json.loads(meta_elements[i].text)
                 result = self.__extract_meta(meta, metadata_type)
-                if result != "N/A":
+                if result:
                     return result  # Return if found
             except (json.JSONDecodeError, IndexError):
-                continue  # Skip to the next element if there"s an error
+                continue  # Skip to the next element if there's an error
 
-        return "N/A"  # Default return value if nothing is found
+        return [] if metadata_type == "author" else None
 
     @property
-    def authors(self):
+    def authors(self) -> list[str]:
         """Extract author information from the HTML soup using JSON-LD data."""
         return self.extract_metadata("author")
 
     @property
-    def date_publish(self):
+    def date_publish(self) -> str | None:
         """Extract the publication date from the HTML soup using JSON-LD data."""
         return self.extract_metadata("date")
 
     @property
-    def category(self):
+    def date_modify(self) -> str | None:
+        """Extract the last-modified date from the HTML soup using JSON-LD data."""
+        return self.extract_metadata("date_modify")
+
+    @property
+    def category(self) -> str | None:
         """Extract the category from the HTML soup using JSON-LD data."""
         return self.extract_metadata("category")
 
     @property
-    def publisher(self):
+    def publisher(self) -> str | None:
         """Extract the publisher from the HTML soup using JSON-LD data."""
         return self.extract_metadata("publisher")
 
-    def __extract_meta(self, meta, metadata_type):
+    def __extract_meta(self, meta: dict, metadata_type: str) -> str | list[str] | None:
         """Extract specific metadata from the JSON-LD."""
-        if metadata_type == "author":
-            return self.__extract_authors(meta)
-        elif metadata_type == "date":
-            return self.__extract_date(meta)
-        elif metadata_type == "category":
-            return self.__extract_category(meta)
-        elif metadata_type == "publisher":
-            return self.__extract_publisher(meta)
-        return "N/A"  # Default if type doesn"t match
+        match metadata_type:
+            case "author":
+                return self.__extract_authors(meta)
+            case "date":
+                return self.__extract_date_field(meta, "datePublished")
+            case "date_modify":
+                return self.__extract_date_field(meta, "dateModified")
+            case "category":
+                return self.__extract_category(meta)
+            case "publisher":
+                return self.__extract_publisher(meta)
+            case _:
+                return None
 
     @staticmethod
-    def __extract_authors(meta):
+    def __extract_authors(meta) -> list[str]:
         """Extract author information from the metadata."""
-        authors = []
-        if "author" in meta:
-            if isinstance(meta["author"], list):
-                authors = [a.get("name") for a in meta["author"] if a.get("name")]
-            elif isinstance(meta["author"], dict):
-                authors = [meta["author"].get("name", "N/A")]
-            elif isinstance(meta["author"], str):
-                authors = [meta["author"]]
+        if "author" not in meta:
+            return []
 
-        return authors if authors else ["N/A"]  # Return a list, default to "N/A" if empty
+        author = meta["author"]
+        if isinstance(author, list):
+            return [a.get("name") for a in author if a.get("name")]
+        elif isinstance(author, dict):
+            name = author.get("name")
+            return [name] if name else []
+        elif isinstance(author, str):
+            return [author]
 
-    @staticmethod
-    def __extract_date(meta):
-        """Extract the publication date from the metadata."""
-        if "datePublished" in meta:
-            if isinstance(meta, dict):
-                return meta["datePublished"]
-            elif isinstance(meta, list) and meta:
-                return meta[0].get("datePublished", "N/A")
-
-        return "N/A"  # Return "N/A" if no date found
+        return []
 
     @staticmethod
-    def __extract_category(meta):
+    def __extract_date_field(meta, key: str) -> str | None:
+        """Extract a date field (e.g. datePublished/dateModified) from the metadata."""
+        if isinstance(meta, dict):
+            return meta.get(key) or None
+        elif isinstance(meta, list) and meta:
+            return meta[0].get(key) or None
+
+        return None
+
+    @staticmethod
+    def __extract_category(meta) -> str | None:
         """Extract the category from the metadata."""
         key = "@type"
-        if key in meta:
-            if isinstance(meta, dict):
-                return meta[key]
-            elif isinstance(meta, list) and meta:
-                return meta[0].get(key, "N/A")
+        if isinstance(meta, dict):
+            return meta.get(key) or None
+        elif isinstance(meta, list) and meta:
+            return meta[0].get(key) or None
 
-        return "N/A"  # Return "N/A" if no category found
+        return None
 
     @staticmethod
-    def __extract_publisher(meta):
+    def __extract_publisher(meta) -> str | None:
         """Extract the publisher from the metadata."""
-        if "publisher" in meta:
-            if isinstance(meta["publisher"], dict):
-                return meta["publisher"].get("name", "N/A")
-            elif isinstance(meta["publisher"], str):
-                return meta["publisher"]
+        if "publisher" not in meta:
+            return None
 
-        return "N/A"  # Return "N/A" if no publisher found
+        publisher = meta["publisher"]
+        if isinstance(publisher, dict):
+            return publisher.get("name") or None
+        elif isinstance(publisher, str):
+            return publisher
+
+        return None
