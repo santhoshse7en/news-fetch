@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "news-fetch"
-version = "0.4.0"
+version = "0.4.1"
 description = "news-fetch is an open-source, easy-to-use news extractor with basic NLP features (cleaning text, keywords, summary) that just works."
 readme = "README.md"
 license = "MIT"
@@ -14,11 +14,12 @@ authors = [
     { name = "M Santhosh Kumar", email = "santhoshse7en@gmail.com" },
 ]
 keywords = [
-    "newspaper4k", "news-fetch", "without-api", "news_scraper",
+    "newspaper4k", "news-fetch", "without-api", "news-scraper",
     "bs4", "lxml", "news-crawler", "news-extractor", "crawler", "extractor",
-    "news", "news-websites", "json", "python", "nlp",
+    "news", "news-websites", "json", "json-ld", "python", "nlp",
     "data-gathering", "news-archive", "news-articles",
-    "extract-articles", "extract-information", "news-scraper",
+    "extract-articles", "extract-information",
+    "rss", "sitemap", "web-scraping",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -34,6 +35,7 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
     "Topic :: Text Processing :: Linguistic",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
 dependencies = [
     "beautifulsoup4>=4.15",
@@ -47,10 +49,10 @@ dependencies = [
 dev = ["build", "setuptools", "twine"]
 
 [project.urls]
-Homepage = "https://santhoshse7en.github.io/news-fetch/"
-Documentation = "https://santhoshse7en.github.io/news-fetch_doc/"
+Homepage = "https://github.com/santhoshse7en/news-fetch"
 Repository = "https://github.com/santhoshse7en/news-fetch"
 Issues = "https://github.com/santhoshse7en/news-fetch/issues"
+Changelog = "https://github.com/santhoshse7en/news-fetch/blob/master/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 include = ["newsfetch*"]

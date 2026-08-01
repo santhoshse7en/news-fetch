@@ -1,11 +1,22 @@
 import re
 from collections import Counter
+from typing import Callable, TypeVar
 
 from unidecode import unidecode
+
+T = TypeVar("T")
 
 
 def unicode(text: str) -> str:
     return unidecode(text).strip()
+
+
+def safe_execute(func: Callable[[], T]) -> T | None:
+    """Run func and return None if it raises an exception."""
+    try:
+        return func()
+    except Exception:
+        return None
 
 
 def clean_text(article: str) -> str:
@@ -15,19 +26,15 @@ def clean_text(article: str) -> str:
     return cleaned_article
 
 
-def extract_keywords(article: str) -> list[tuple[str, int]]:
-    """Extract keywords from the article."""
-    # Split the article into words
-    words = re.findall(r'\b\w+\b', article.lower())
-    # Count frequency of each word
-    word_counts = Counter(words)
-    # Filter out common stopwords (you can expand this list)
-    stopwords = {'and', 'the', 'is', 'in', 'of', 'to', 'a', 'for', 'was', 'that', 'on', 'as', 'with', 'it', 'this',
-                 'are', 'by', 'an'}
-    keywords = {word: count for word, count in word_counts.items() if word not in stopwords}
+_STOPWORDS = {'and', 'the', 'is', 'in', 'of', 'to', 'a', 'for', 'was', 'that', 'on', 'as', 'with', 'it', 'this',
+              'are', 'by', 'an'}
 
-    # Return keywords sorted by frequency
-    return sorted(keywords.items(), key=lambda x: x[1], reverse=True)
+
+def extract_keywords(article: str, max_keywords: int = 10) -> list[str]:
+    """Extract the most frequent non-stopword keywords from the article."""
+    words = re.findall(r'\b\w+\b', article.lower())
+    word_counts = Counter(word for word in words if word not in _STOPWORDS)
+    return [word for word, _ in word_counts.most_common(max_keywords)]
 
 
 def summarize_article(article: str, max_sentences: int = 3) -> str:

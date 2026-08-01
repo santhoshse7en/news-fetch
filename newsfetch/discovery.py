@@ -32,7 +32,7 @@ class NewsSiteURLExtractor:
                 articles.setdefault(article["url"], article)
 
         results = list(articles.values())
-        return results[:limit] if limit else results
+        return results if limit is None else results[:limit]
 
     def __safe_get(self, url: str) -> requests.Response | None:
         """Fetch a URL and return the response, or None on any failure."""
