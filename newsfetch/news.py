@@ -68,15 +68,14 @@ class Newspaper:
     @staticmethod
     def __extract(*sources: str | list[str] | None) -> str | list[str] | None:
         """Generic method to extract the first valid value from provided sources."""
-        for source in sources:
-            value = source  # Accessing the property directly
+        for value in sources:
             if value:
                 return value
         return None
 
     def __extract_authors(self) -> list[str]:
         """Extract the authors from the article or the news source."""
-        return self.__extract(self.__article.authors, self.__soup.authors)
+        return self.__extract(self.__article.authors, self.__soup.authors) or []
 
     def __extract_date_publish(self) -> str | None:
         """Extract the publication date of the article."""
@@ -127,8 +126,8 @@ class Newspaper:
         return self.__article.meta_favicon
 
     def __extract_description(self) -> str | None:
-        """Extract the description of the article."""
-        return self.__article.summary
+        """Extract the meta description of the article, falling back to the summary."""
+        return self.__article.meta_description or self.summary
 
     def __extract_word_count(self) -> int:
         """Count the words in the extracted article text."""
