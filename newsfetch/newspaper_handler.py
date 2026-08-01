@@ -55,7 +55,8 @@ class ArticleHandler:
         keywords = self.__process_keywords(self.__article.keywords)
 
         if not keywords:
-            return extract_keywords(self.article)
+            article = self.article
+            return extract_keywords(article) if article else []
 
         return keywords
 
