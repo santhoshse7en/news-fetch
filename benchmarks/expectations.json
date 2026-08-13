@@ -1,0 +1,22 @@
+{
+  "rich_article.html": {
+    "url": "https://www.example.com/news/transit-plan",
+    "title_contains": "Transit Plan",
+    "text_contains": "transit expansion"
+  },
+  "jsonld_graph.html": {
+    "url": "https://www.bbc.test/news/climate",
+    "title_contains": "Climate Targets",
+    "text_contains": "Westminster"
+  },
+  "heuristic_only.html": {
+    "url": "https://news.example.org/2024/03/01/harbor-signal",
+    "title_contains": "Mysterious Signal",
+    "text_contains": "harbor"
+  },
+  "og_semantic.html": {
+    "url": "https://wire.example/2025/11/02/markets-rally",
+    "title_contains": "Markets Rally",
+    "text_contains": "inflation"
+  }
+}

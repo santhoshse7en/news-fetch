@@ -2,21 +2,36 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.4.1]
+## [1.0.0]
 
-### Fixed
-- `SoupHandler` now unwraps the `{"@context": ..., "@graph": [...]}` JSON-LD shape used by sites like BBC. Previously the JSON-LD fallback for `publication`, `category`, `date_publish`, and `date_modify` silently returned nothing on any site using this (common) shape.
-- `ArticleHandler.date_publish` now also checks the nested `article.published_time` key that Open Graph article tags actually populate, matching how `category` already looked up `article.section`.
-- `Newspaper.authors` no longer returns `None` when neither the article engine nor the JSON-LD fallback has authors; it now consistently returns `[]`, matching its declared type.
-- Removed dead `max_keywords` parameter from `ArticleHandler.__process_keywords` (never called with a value).
-- Deduplicated the identical `__safe_execute` helper that was copy-pasted across `ArticleHandler` and `SoupHandler` into a shared `newsfetch.helpers.safe_execute`.
+### Added
+- Production-stable release of the independent extraction engine.
+- CLI: `news-fetch`, `news-fetch batch` (JSONL), `news-fetch discover`.
+- `fetch_iter` for memory-conscious streaming bulk results.
+- Strategy plugin API: `register_strategy` / `ExtractionStrategy` / `CallableStrategy`.
+- Optional browser rendering: `pip install news-fetch[browser]` + `render=True` / `browser_fallback=True`.
+- Disk cache (`cache=True`) and `respect_robots=True`.
+- HTTP 429 `Retry-After` handling in the sync client.
+- Extra HTML regression fixtures.
 
 ### Changed
-- `pyproject.toml`'s `Homepage` and `Documentation` project URLs pointed at a GitHub Pages site that returns 404; `Homepage` now points at the GitHub repository and the dead `Documentation` entry was removed.
-- Bumped `newspaper4k` to `0.9.6` and `twine` (dev) to `7.0.0` in the pinned requirements files.
-- Added `Typing :: Typed` classifier (the package ships `py.typed`).
-- README: fixed a dependency-list omission (`lxml-html-clean`), a mislabeled "Repository" link, and stale sample output; added GitHub stats badges, a table of contents, and a feature comparison table.
+- Version / user-agent bumped to 1.0; classifier set to Production/Stable.
+- README optimized for PyPI discoverability (news scraper / article extractor queries).
+- In-repo `docs/` removed (documentation lives in a separate repository).
 
-## [0.4.0] and earlier
+## [0.6.0]
 
-See the [GitHub release history](https://github.com/santhoshse7en/news-fetch/commits/master) — changelog tracking starts at 0.4.1.
+### Added
+- Evidence → rank → confidence architecture (`article.confidence`, `article.extraction`).
+- Page-type detection and strict / threshold gates.
+- `LowConfidenceExtractionError`, `article.to_json()`.
+
+## [0.5.1]
+
+### Added
+- Proxy / proxy pools, rotation, `request_delay`, progress callbacks, `iter_fetch`.
+
+## [0.5.0]
+
+### Changed
+- Independent extraction engine; removed `newspaper4k` as the core scraper.

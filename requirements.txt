@@ -1,5 +1,4 @@
-requests==2.34.2
-beautifulsoup4==4.15.0
-newspaper4k==0.9.6
-lxml-html-clean==0.4.4
-Unidecode==1.4.0
+lxml>=5.0
+cssselect>=1.2
+requests>=2.32
+python-dateutil>=2.9
