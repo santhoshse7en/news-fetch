@@ -1,139 +1,187 @@
 [![PyPI version](https://img.shields.io/pypi/v/news-fetch.svg?style=flat-square)](https://pypi.org/project/news-fetch)
 [![Downloads](https://pepy.tech/badge/news-fetch/month)](https://pepy.tech/project/news-fetch)
 [![Python versions](https://img.shields.io/pypi/pyversions/news-fetch.svg?style=flat-square)](https://pypi.org/project/news-fetch)
-[![License](https://img.shields.io/pypi/l/news-fetch.svg?style=flat-square)](https://pypi.python.org/pypi/news-fetch/)
-[![GitHub stars](https://img.shields.io/github/stars/santhoshse7en/news-fetch.svg?style=flat-square)](https://github.com/santhoshse7en/news-fetch/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/santhoshse7en/news-fetch.svg?style=flat-square)](https://github.com/santhoshse7en/news-fetch/network/members)
-[![Open issues](https://img.shields.io/github/issues/santhoshse7en/news-fetch.svg?style=flat-square)](https://github.com/santhoshse7en/news-fetch/issues)
-[![Last commit](https://img.shields.io/github/last-commit/santhoshse7en/news-fetch.svg?style=flat-square)](https://github.com/santhoshse7en/news-fetch/commits/master)
+[![License](https://img.shields.io/pypi/l/news-fetch.svg?style=flat-square)](https://pypi.org/project/news-fetch/)
+[![CI](https://img.shields.io/github/actions/workflow/status/santhoshse7en/news-fetch/ci.yml?style=flat-square)](https://github.com/santhoshse7en/news-fetch/actions)
 
-# 📰 news-fetch
+# news-fetch
 
-**news-fetch** extracts structured data from a news article URL with one call: `Newspaper(url=...).get_dict` 🌐. Under the hood it's built on [newspaper4k](https://github.com/AndyTheFactory/newspaper4k), but it isn't just a wrapper around it — it exists to fix the gaps single-engine extraction leaves.
+**Python news scraper & article extractor** — extract title, text, authors, date, image, and publisher from any news URL. No API key. Confidence scores included.
 
-If this saves you time, **please ⭐ star the repo** — it's the main way other people find it, and it's free.
-
----
-
-## 📚 Table of Contents
-
-- [Why news-fetch?](#why-news-fetch)
-- [Extracted Information](#extracted-information)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Links](#project-links)
-- [Contributing](#contributing)
-- [License](#license)
-
-## ✨ Why news-fetch?
-
-| | `news-fetch` | Plain `newspaper4k` |
-| --- | :---: | :---: |
-| Publication / category / modified-date backfilled from JSON-LD when Open Graph tags are missing (e.g. BBC) | ✅ | ❌ |
-| `summary` / `keywords` always populated, no NLTK corpus download needed | ✅ | ❌ (`.nlp()` requires one) |
-| One flat dict, first non-empty value wins across engines | ✅ | ❌ (assemble it yourself) |
-| Site-wide article discovery via sitemap/RSS, no browser automation | ✅ | ❌ |
-| Concurrent batch scraping with per-URL failure isolation | ✅ | ❌ |
-| Reading time & word count computed for free | ✅ | ❌ |
-| Install footprint | ~50MB, no Scrapy/boto3/Selenium | — |
-
-In detail:
-
-* **JSON-LD backfill.** Many modern news sites (e.g. BBC) don't expose Open Graph tags that newspaper4k relies on for `publication`/`category`, but do embed a `schema.org/NewsArticle` JSON-LD block. news-fetch parses that block directly and fills in `publication`, `category`, and `date_modify` whenever the primary engine comes up empty — no extra dependency required, since it reuses the `beautifulsoup4`/`requests` already in the base install.
-* **No NLTK download required.** newspaper4k's built-in summary/keyword extraction (`.nlp()`) needs an NLTK corpus download, which routinely fails behind corporate proxies or strict SSL setups. news-fetch falls back to a dependency-free, pure-stdlib summarizer/keyword extractor when that's unavailable, so `summary`/`keywords` are never empty.
-* **Every field, one flat dict, first non-empty value wins.** Instead of learning three different libraries' inconsistent APIs, you get one object where each field is resolved by trying every available engine in priority order and returning the first real value.
-* **Site-wide article discovery, no browser automation.** `NewsSiteURLExtractor` finds a news site's recent article URLs (with title/date, when available) via its `robots.txt` sitemap directives, Google News sitemaps, and RSS/Atom feeds — the same techniques real news aggregators use, and safer/more reliable than scraping a search engine.
-* **Reading time and word count**, computed for free from the extracted article text.
-* **Concurrent batch scraping** via `Newspaper.from_urls([...])` — one bad URL doesn't take down the whole batch; it just comes back as `None`.
-* **A minimal, honest dependency footprint.** The whole install is ~50MB: newspaper4k, beautifulsoup4, requests, lxml-html-clean, Unidecode — no Scrapy, no boto3, no Selenium.
-
-## 📝 Extracted Information
-
-news-fetch extracts the following attributes from news articles. You can also check out an [example JSON file](https://github.com/santhoshse7en/news-fetch/blob/master/newsfetch/example/sample.json).
-
-* 📰 Headline
-* ✍️ Author(s)
-* 📅 Publication date
-* 🗞️ Publication
-* 📂 Category
-* 🌍 Source domain
-* 📑 Article content
-* 📝 Summary
-* 🔑 Keywords
-* 🌐 URL
-* 🌐 Language
-* ⏱️ Word count & estimated reading time
-
-## 🔧 Installation
-
-Install from PyPI with [pip](https://pip.pypa.io/en/stable/):
+> **Fetch news. Know why it worked.**
 
 ```bash
 pip install news-fetch
 ```
 
-Or install from source:
+```python
+from newsfetch import fetch
+
+article = fetch("https://www.thehindu.com/...")
+print(article.title)
+print(article.text)
+print(article.authors)
+print(article.published_at)
+print(article.image)
+print(article.confidence.overall)   # 0.0–1.0
+print(article.content_source)       # e.g. json-ld.articleBody
+```
 
 ```bash
-git clone https://github.com/santhoshse7en/news-fetch.git
-cd news-fetch
-pip install .
+news-fetch https://example.com/article
+news-fetch https://example.com/article --json
+news-fetch batch urls.txt -o articles.jsonl
 ```
 
-## 🚀 Usage
+---
 
-To scrape all the news details, use the `newspaper` function:
+## Why news-fetch?
+
+A **lightweight alternative** to newspaper3k / newspaper4k / trafilatura wrappers — with its **own extraction engine**, **confidence scores**, and **bulk + proxy** support.
+
+| Feature | news-fetch |
+| --- | :---: |
+| News article extraction (title, body, authors, date, image) | ✅ |
+| Confidence scores + extraction provenance | ✅ |
+| Bulk scraping (`fetch_many` / `fetch_iter` / CLI JSONL) | ✅ |
+| Proxy + proxy rotation for thousands of URLs | ✅ |
+| RSS / sitemap article discovery | ✅ |
+| Async (`pip install news-fetch[async]`) | ✅ |
+| Optional browser render (`pip install news-fetch[browser]`) | ✅ |
+| Disk cache + robots.txt respect | ✅ |
+| No API key / no account | ✅ |
+| Small deps (`lxml`, `requests`, `python-dateutil`, `cssselect`) | ✅ |
+
+---
+
+## Install
+
+```bash
+pip install news-fetch
+pip install news-fetch[async]     # httpx async fetch
+pip install news-fetch[browser]   # Playwright fallback (then: playwright install chromium)
+```
+
+**Requirements:** Python 3.10+
+
+---
+
+## Quick start
+
+### Single URL
 
 ```python
-from newsfetch.news import Newspaper
+from newsfetch import fetch
 
-news = Newspaper(url='https://www.thehindu.com/news/cities/Madurai/aa-plays-a-pivotal-role-in-helping-people-escape-from-the-grip-of-alcoholism/article67716206.ece')
-print(news.headline)
-# Output: 'AA plays a pivotal role in helping people escape from the grip of alcoholism'
-print(news.word_count, news.reading_time_minutes)
-# Output: 210 1
+article = fetch(url)
+print(article.title, article.text, article.confidence.overall)
 ```
 
-To discover recent article URLs from a news site (via its sitemaps/RSS feeds — no browser required):
+### From HTML (no network)
 
 ```python
-from newsfetch.discovery import NewsSiteURLExtractor
+from newsfetch import extract
 
-site = NewsSiteURLExtractor(news_domain='https://www.bbc.com', limit=10)
-for article in site.articles:
-    print(article)
-# Output: {'url': 'https://www.bbc.com/news/articles/...', 'title': '...', 'date': '2026-07-10T16:56:53Z'}
+article = extract(html_bytes, url="https://example.com/story")
 ```
 
-To scrape many URLs at once, with per-URL failures isolated:
+### Bulk scraping + proxies
 
 ```python
-from newsfetch.news import Newspaper
+from newsfetch import fetch_many, fetch_iter
 
-results = Newspaper.from_urls(site.urls, max_workers=5)
-for result in results:
-    if result is not None:
-        print(result.headline)
+results = fetch_many(
+    urls,
+    max_workers=20,
+    proxies=["http://user:pass@p1:8080", "http://user:pass@p2:8080"],
+    request_delay=0.05,
+)
+
+for url, article in fetch_iter(urls, max_workers=16):
+    if article:
+        print(article.title)
 ```
 
-## 🔗 Project Links
+### Strict mode (production pipelines)
 
-| Source | Link |
-| --- | --- |
-| PyPI | [pypi.org/project/news-fetch](https://pypi.org/project/news-fetch/) |
-| Repository | [github.com/santhoshse7en/news-fetch](https://github.com/santhoshse7en/news-fetch) |
-| Issue tracker | [github.com/santhoshse7en/news-fetch/issues](https://github.com/santhoshse7en/news-fetch/issues) |
+```python
+from newsfetch import fetch, LowConfidenceExtractionError
 
-## 🤝 Contributing
+try:
+    article = fetch(url, strict=True)
+except LowConfidenceExtractionError as e:
+    print(e.failed_fields, e.confidence.overall)
+```
 
-Pull requests are welcome! For major changes, please [open an issue](https://github.com/santhoshse7en/news-fetch/issues) first to discuss what you'd like to change.
+### Discovery (RSS / sitemaps)
 
-* 🍴 [Fork the repo](https://github.com/santhoshse7en/news-fetch/fork), make your change, and open a PR.
-* 🐛 Found a bug or have a feature idea? [File an issue](https://github.com/santhoshse7en/news-fetch/issues/new).
-* ⭐ Starring the repo costs nothing and genuinely helps — it's how other people searching for a news extractor find this one.
+```python
+from newsfetch import discover
 
-Please also read the [Code of Conduct](https://github.com/santhoshse7en/news-fetch/blob/master/CODE_OF_CONDUCT.md) before participating.
+for item in discover("https://www.bbc.com", limit=10):
+    print(item["url"], item.get("title"))
+```
 
-## 📄 License
+### Async
 
-This project is licensed under the [MIT License](https://github.com/santhoshse7en/news-fetch/blob/master/LICENSE).
+```python
+from newsfetch import fetch_async, fetch_many_async
+
+article = await fetch_async(url)
+articles = await fetch_many_async(urls, max_concurrency=50, proxies=PROXIES)
+```
+
+### CLI
+
+```bash
+news-fetch https://example.com/article
+news-fetch get URL --json
+news-fetch batch urls.txt -o out.jsonl --workers 20
+news-fetch discover https://www.theguardian.com --limit 10
+```
+
+### Cache / robots / browser
+
+```python
+from newsfetch import fetch, Config, NewsFetcher
+
+fetch(url, cache=True, respect_robots=True)
+fetch(url, render=True)                      # needs news-fetch[browser]
+fetch(url, browser_fallback=True)            # retry with Playwright if confidence is low
+```
+
+### Custom strategy plugin
+
+```python
+from newsfetch import NewsFetcher, CallableStrategy
+from newsfetch.strategies.base import Candidate
+
+def my_strategy(doc):
+    return {"title": [Candidate("Custom", "plugin.custom", 0.99)]}
+
+fetcher = NewsFetcher()
+fetcher.register_strategy(CallableStrategy("custom", my_strategy))
+```
+
+---
+
+## Article fields
+
+`url` · `canonical_url` · `title` · `description` · `text` · `authors` · `published_at` · `modified_at` · `publisher` · `language` · `image` · `keywords` · `section` · `summary` · `word_count` · `reading_time_minutes` · `page_type` · `is_article` · `confidence` · `extraction` · `sources`
+
+```python
+article.to_dict()
+article.to_json()
+```
+
+---
+
+## Links
+
+- **PyPI:** https://pypi.org/project/news-fetch/
+- **Docs:** https://santhoshse7en.github.io/newsfetch_doc/
+- **GitHub:** https://github.com/santhoshse7en/news-fetch
+- **Issues:** https://github.com/santhoshse7en/news-fetch/issues
+- **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+
+MIT License · Built for developers who need reliable Python news scraping without an API.

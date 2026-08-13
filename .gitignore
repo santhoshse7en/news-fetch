@@ -10,3 +10,5 @@ venv/
 .mypy_cache/
 .ruff_cache/
 .DS_Store
+.news-fetch-cache.sqlite
+*.sqlite

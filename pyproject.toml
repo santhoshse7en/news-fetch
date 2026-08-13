@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "news-fetch"
-version = "0.4.1"
-description = "news-fetch is an open-source, easy-to-use news extractor with basic NLP features (cleaning text, keywords, summary) that just works."
+version = "1.0.0"
+description = "Python news scraper & article extractor — fetch news URLs, extract title/text/authors/date/image with confidence scores. Bulk scraping, proxies, RSS/sitemap discovery. No API key."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -14,17 +14,32 @@ authors = [
     { name = "M Santhosh Kumar", email = "santhoshse7en@gmail.com" },
 ]
 keywords = [
-    "newspaper4k", "news-fetch", "without-api", "news-scraper",
-    "bs4", "lxml", "news-crawler", "news-extractor", "crawler", "extractor",
-    "news", "news-websites", "json", "json-ld", "python", "nlp",
-    "data-gathering", "news-archive", "news-articles",
-    "extract-articles", "extract-information",
-    "rss", "sitemap", "web-scraping",
+    "news scraper",
+    "news extractor",
+    "article extractor",
+    "news-fetch",
+    "python news scraper",
+    "web scraping",
+    "news crawler",
+    "json-ld",
+    "opengraph",
+    "rss",
+    "sitemap",
+    "bulk scraping",
+    "proxy",
+    "trafilatura alternative",
+    "newspaper3k alternative",
+    "newspaper4k alternative",
+    "news-please alternative",
+    "readability",
+    "without api",
+    "news api free",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -38,24 +53,49 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "beautifulsoup4>=4.15",
-    "requests>=2.34",
-    "newspaper4k>=0.9.3.1",
-    "lxml-html-clean>=0.4,<0.4.5",
-    "Unidecode>=1.4",
+    "lxml>=5.0",
+    "cssselect>=1.2",
+    "requests>=2.32",
+    "python-dateutil>=2.9",
 ]
 
 [project.optional-dependencies]
-dev = ["build", "setuptools", "twine"]
+async = ["httpx>=0.27"]
+browser = ["playwright>=1.40"]
+dev = [
+    "build",
+    "httpx>=0.27",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "setuptools",
+    "twine",
+]
+
+[project.scripts]
+news-fetch = "newsfetch.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/santhoshse7en/news-fetch"
 Repository = "https://github.com/santhoshse7en/news-fetch"
 Issues = "https://github.com/santhoshse7en/news-fetch/issues"
 Changelog = "https://github.com/santhoshse7en/news-fetch/blob/master/CHANGELOG.md"
+Documentation = "https://santhoshse7en.github.io/newsfetch_doc/"
 
 [tool.setuptools.packages.find]
 include = ["newsfetch*"]
 
 [tool.setuptools.package-data]
 newsfetch = ["example/*.json", "py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]
