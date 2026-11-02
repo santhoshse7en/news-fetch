@@ -121,5 +121,6 @@ jobs:
           data = json.load(open("out.json", encoding="utf-8"))
           assert data["title"] == "City Council Approves Transit Plan", data["title"]
           assert data["confidence"]["overall"] > 0.5, data["confidence"]
+          assert data["markdown"], "markdown output missing"
           print("wheel OK:", newsfetch.__version__, data["title"])
           EOF

@@ -1,4 +1,4 @@
-"""FetchResult bulk API (1.1)."""
+"""FetchResult bulk API and Markdown / HTML body output (1.1)."""
 
 import asyncio
 import json
@@ -11,14 +11,22 @@ from newsfetch import (
     FetchError,
     FetchResult,
     NewsFetcher,
+    extract,
     fetch_many,
     fetch_results,
     iter_results,
 )
 from newsfetch.cli import main
+from newsfetch.output import clean_body, to_markdown
+from newsfetch.parser.html import Document
 
 FIXTURES = Path(__file__).parent / "fixtures" / "html"
 ARTICLE = (FIXTURES / "rich_article.html").read_bytes()
+
+
+def _md(html: str, selector: str = "article", base_url: str = "https://ex.com/news/a") -> str:
+    doc = Document.from_html(html, base_url=base_url)
+    return to_markdown(clean_body(doc.css(selector)[0], base_url=base_url))
 
 
 # --- FetchResult ------------------------------------------------------------------------
@@ -98,3 +106,88 @@ def test_cli_batch_reports_errors_and_exit_code(server, tmp_path, capsys):
     urls.write_text(f"{server.base}/missing\n", encoding="utf-8")
     assert main(["batch", str(urls)]) == 1  # nothing succeeded
 
+
+# --- Markdown / HTML output -------------------------------------------------------------
+
+
+def test_markdown_always_html_opt_in():
+    article = extract(ARTICLE, url="https://www.example.com/news/x")
+    assert article.markdown.startswith("# City Council Approves Transit Plan")
+    assert "transit expansion" in article.markdown
+    assert article.html is None
+    assert article.to_dict()["markdown"] == article.markdown
+
+    with_html = extract(ARTICLE, url="https://www.example.com/news/x", include_html=True)
+    assert with_html.html.startswith("<article>")
+    assert "<script" not in with_html.html and "class=" not in with_html.html
+
+
+def test_markdown_for_each_content_source():
+    for name, source in [
+        ("rich_article", "dom:json-ld.articleBody"),  # JSON-LD text mapped back to its DOM node
+        ("og_semantic", "dom:semantic.itemprop.articleBody"),
+        ("heuristic_only", "dom:heuristic.dom-score"),
+    ]:
+        article = extract((FIXTURES / f"{name}.html").read_bytes(), url="https://www.example.com/news/x")
+        assert article.sources["markdown"] == source, name
+        assert article.markdown and len(article.markdown) >= len(article.text) * 0.8, name
+
+
+def test_markdown_falls_back_to_text_without_dom_node():
+    body = "First paragraph of the story with enough words to count here. " * 3
+    html = (
+        '<html><head><script type="application/ld+json">'
+        + json.dumps({"@type": "NewsArticle", "headline": "Only JSON", "articleBody": f"{body}\n\nSecond *para*."})
+        + "</script></head><body><p>Unrelated page chrome.</p></body></html>"
+    )
+    article = extract(html, url="https://ex.com/a", include_html=True)
+    assert article.sources["markdown"] == "text"
+    assert article.markdown.endswith("Second \\*para\\*.")
+    assert article.html.startswith("<p>First paragraph") and "<p>Second *para*.</p>" in article.html
+
+
+def test_markdown_structure():
+    md = _md(
+        """<article>
+        <h2>Key points</h2>
+        <p>Read the <a href="/report.pdf">full <b>report</b></a> or <em>skim</em>.<br>Next line.</p>
+        <ul><li>One</li><li>Two<ul><li>Nested</li></ul></li></ul>
+        <ol start="3"><li>Three</li><li>Four</li></ol>
+        <blockquote><p>Quoted.</p><p>Again.</p></blockquote>
+        <figure><img data-src="/a.jpg" alt="Photo"><figcaption>Caption</figcaption></figure>
+        <pre><code class="language-python">x = 1</code></pre>
+        <table><tr><th>Team</th><th>Score</th></tr><tr><td>A|B</td><td>3</td></tr></table>
+        </article>"""
+    )
+    assert md == "\n\n".join(
+        [
+            "## Key points",
+            "Read the [full **report**](https://ex.com/report.pdf) or *skim*.  \nNext line.",
+            "- One\n- Two\n  - Nested",
+            "3. Three\n4. Four",
+            "> Quoted.\n>\n> Again.",
+            "![Photo](https://ex.com/a.jpg)",
+            "*Caption*",
+            "```python\nx = 1\n```",
+            "| Team | Score |\n|---|---|\n| A\\|B | 3 |",
+        ]
+    )
+
+
+def test_markdown_escaping():
+    md = _md("<article><p>5 * 3 = 15_000 [sic]</p><p>1. not a list</p><p># not a heading</p></article>")
+    assert md == "5 \\* 3 = 15\\_000 \\[sic\\]\n\n1\\. not a list\n\n\\# not a heading"
+
+
+def test_clean_body_removes_boilerplate_keeps_text():
+    html = """<article>
+      <script>alert(1)</script><p hidden>secret</p><p style="display: none">hidden too</p>
+      <div class="share-buttons"><a href="https://fb.com/x">Share</a></div>
+      <p>Before <span>span</span> after<!-- c --> <a href="javascript:void(0)">click</a> end.</p>
+      <aside>Related</aside><img src="data:image/png;base64,xx">
+    </article>"""
+    assert _md(html) == "Before span after click end."
+    doc = Document.from_html(html)
+    node = doc.css("article")[0]
+    clean_body(node)
+    assert node.cssselect("script")  # the source document is not modified

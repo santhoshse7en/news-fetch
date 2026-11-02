@@ -158,7 +158,7 @@ def extract_content_heuristic(doc: Document) -> list[Candidate[str]]:
             continue
         # Normalize score into 0.4–0.9 band for merging with other strategies
         norm = min(0.9, 0.45 + (score / 200.0))
-        results.append(Candidate(text, "heuristic.dom-score", norm, raw={"score": score}))
+        results.append(Candidate(text, "heuristic.dom-score", norm, raw={"score": score, "node": node}))
         break  # best only as primary; keep one strong candidate
 
     return results

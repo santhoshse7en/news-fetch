@@ -25,6 +25,8 @@ class Config:
     max_workers: int = 8
     strip_tracking_params: bool = True
     min_text_length: int = 50
+    # Fill Article.html with the cleaned body HTML (Article.markdown is always filled)
+    include_html: bool = False
 
     # Networking / scale
     proxy: str | ProxyMap | None = None

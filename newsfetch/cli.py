@@ -58,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     get_p = sub.add_parser("get", help="Fetch a single article URL")
     get_p.add_argument("url", nargs="?", help="Article URL")
     get_p.add_argument("--json", action="store_true", help="Print JSON")
+    get_p.add_argument("--markdown", action="store_true", help="Print the article body as Markdown")
     get_p.add_argument("--html", type=Path, help="Extract from a local HTML file (no network)")
     get_p.add_argument("--proxy", help="HTTP(S) proxy URL")
     get_p.add_argument("--strict", action="store_true")
@@ -146,6 +147,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.json:
         print(article.to_json(indent=2))
+    elif args.markdown:
+        if article.title and not (article.markdown or "").startswith("# "):
+            print(f"# {article.title}\n")
+        print(article.markdown or "")
     else:
         _print_human(article)
     return 0

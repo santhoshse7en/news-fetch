@@ -43,7 +43,8 @@ def candidates_to_evidence(field: str, candidates: list[Candidate]) -> list[Evid
             strategy = "meta"
         signals: dict[str, Any] = {}
         if isinstance(c.raw, dict):
-            signals = {k: v for k, v in c.raw.items() if k != "value"}
+            # "node" (lxml element for body rendering) is not a JSON-serializable signal
+            signals = {k: v for k, v in c.raw.items() if k not in {"value", "node"}}
         out.append(
             Evidence(
                 field=field,

@@ -120,12 +120,12 @@ def extract_semantic(doc: Document) -> dict[str, list[Candidate]]:
     for node in doc.css('[itemprop="articleBody"]')[:2]:
         text = _paragraphs_text(node)
         if len(text) > 80:
-            out["text"].append(Candidate(text, "semantic.itemprop.articleBody", 0.92))
+            out["text"].append(Candidate(text, "semantic.itemprop.articleBody", 0.92, raw={"node": node}))
 
     for node in doc.css("article")[:3]:
         text = _paragraphs_text(node)
         if len(text) > 120:
-            out["text"].append(Candidate(text, "semantic.article", 0.78))
+            out["text"].append(Candidate(text, "semantic.article", 0.78, raw={"node": node}))
 
     # lead image inside article
     for node in doc.css("article img[src], figure img[src]")[:5]:
