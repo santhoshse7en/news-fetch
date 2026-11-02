@@ -323,8 +323,11 @@ uv build                # sdist + wheel into dist/
 ```
 
 CI runs ruff, tests on Python 3.11–3.14 (Linux, plus macOS), the lowest supported dependency
-versions, and a smoke test of the built wheel. Please add a regression test with bug fixes and an
-entry in [CHANGELOG.md](CHANGELOG.md). See the [Code of Conduct](CODE_OF_CONDUCT.md).
+versions, and a smoke test of the built wheel. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
+workflow, test conventions and release steps, and the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+**Security issues:** please report them privately as described in [SECURITY.md](SECURITY.md), not in
+public issues.
 
 ---
 
@@ -389,5 +392,6 @@ For bugs and feature requests, please use [GitHub Issues](https://github.com/san
 - **Issues:** https://github.com/santhoshse7en/news-fetch/issues
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 - **Partnerships:** [Sponsors & partnerships](#sponsors--partnerships)
+- **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md) · **Security:** [SECURITY.md](SECURITY.md)
 
 MIT License · Built for developers who need reliable Python news scraping without an API.
