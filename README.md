@@ -328,6 +328,59 @@ entry in [CHANGELOG.md](CHANGELOG.md). See the [Code of Conduct](CODE_OF_CONDUCT
 
 ---
 
+## Sponsors & partnerships
+
+news-fetch is free, MIT-licensed and maintained in spare time. Partnerships fund maintenance, new
+extractors and faster fixes — and they never change what the library does by default.
+
+### Ways to work together
+
+| Partnership | What it looks like | Good fit for |
+| --- | --- | --- |
+| **Sponsorship** | Your logo/name in this README and thanks in release notes | Companies and teams running news-fetch in production |
+| **Integration partner** | A documented guide or example showing news-fetch with your product | Proxy networks, rendering/browser APIs, vector databases and RAG platforms, news-data and media-monitoring tools |
+| **Affiliate program** | A clearly labelled referral link in the matching docs section (e.g. proxies next to proxy rotation) | Proxy and hosting providers relevant to scraping workloads |
+| **Commercial support** | Custom site extractors, priority fixes, integration help, private consulting | Teams with specific sources or SLAs |
+| **Research & education** | Collaboration, datasets and benchmarks, a listing of your paper or course | Universities, journalism and NLP research groups |
+
+### Current sponsors & partners
+
+None yet — [get in touch](#get-in-touch) to be the first. Using news-fetch in a product or a paper?
+Open a pull request adding it to a "Used by" list here.
+
+### Principles
+
+These hold for every sponsorship, integration and affiliate deal:
+
+- **Open source stays open.** The library stays MIT-licensed; no feature is paywalled or sponsor-only.
+- **Neutral defaults.** No partner service is a required dependency, a default proxy, or a default endpoint.
+  Traffic only goes where *you* point it.
+- **No tracking.** No telemetry, ads, referral parameters or sponsored content are added to the code,
+  to requests, or to extracted articles.
+- **Labelled links.** Affiliate and sponsored links are always marked as such (*affiliate* / *sponsored*)
+  and listed in this section.
+- **Independent results.** Benchmarks, comparisons and recommendations are not for sale.
+- **Responsible scraping only.** We don't partner with services whose purpose is bypassing paywalls,
+  logins, CAPTCHAs or other access controls. Integrations must respect site terms, robots.txt and the law.
+
+### Affiliate disclosure
+
+Some links in this project's documentation may be affiliate links, marked *affiliate*. If you buy
+through one, the maintainer may earn a commission at no extra cost to you. Affiliate relationships
+never affect the code, the defaults, or which tools are recommended.
+
+### Get in touch
+
+Email **santhoshse7en@gmail.com** with the subject `news-fetch partnership` and include:
+
+- who you are (company/organisation and a link),
+- the kind of partnership from the table above,
+- how you use or plan to use news-fetch.
+
+For bugs and feature requests, please use [GitHub Issues](https://github.com/santhoshse7en/news-fetch/issues) instead.
+
+---
+
 ## Links
 
 - **PyPI:** https://pypi.org/project/news-fetch/
@@ -335,5 +388,6 @@ entry in [CHANGELOG.md](CHANGELOG.md). See the [Code of Conduct](CODE_OF_CONDUCT
 - **GitHub:** https://github.com/santhoshse7en/news-fetch
 - **Issues:** https://github.com/santhoshse7en/news-fetch/issues
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+- **Partnerships:** [Sponsors & partnerships](#sponsors--partnerships)
 
 MIT License · Built for developers who need reliable Python news scraping without an API.
