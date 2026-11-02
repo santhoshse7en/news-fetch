@@ -1,0 +1,129 @@
+name: Tests
+
+on:
+  push:
+    branches: [master, "release/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.x"
+
+      - name: Ruff
+        run: |
+          python -m pip install --upgrade "ruff>=0.6"
+          ruff check --output-format=github .
+
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: macos-latest
+            python-version: "3.14"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Dependencies come from pyproject.toml, so an undeclared/missing runtime
+      # dependency (e.g. cssselect) fails here instead of on a user's machine.
+      - name: Install package and dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[dev]"
+          python -m pip check
+
+      - name: Pytest
+        run: python -m pytest -q --cov=newsfetch --cov-report=term-missing:skip-covered
+
+      - name: Fixture benchmark
+        run: python benchmarks/run_benchmark.py
+        env:
+          PYTHONPATH: .
+
+  lowest-deps:
+    name: test (lowest dependency versions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
+        with:
+          python-version: "3.10"
+
+      # Verifies the ">=" lower bounds in pyproject.toml are actually sufficient
+      - name: Install minimum runtime dependencies
+        run: |
+          uv venv --clear
+          uv pip install --resolution lowest-direct .
+          uv pip install pytest
+          uv pip list
+
+      - name: Pytest
+        run: .venv/bin/python -m pytest -q
+
+  package:
+    name: wheel smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.x"
+
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          twine check --strict dist/*
+
+      # Install the built wheel into a clean venv and run it from outside the
+      # repo, so nothing is imported from the source tree.
+      - name: Install wheel in a clean environment and run the CLI
+        run: |
+          python -m venv "$RUNNER_TEMP/smoke"
+          "$RUNNER_TEMP/smoke/bin/python" -m pip install dist/*.whl
+          cp tests/fixtures/html/rich_article.html "$RUNNER_TEMP/"
+          cd "$RUNNER_TEMP"
+          ./smoke/bin/news-fetch --version
+          ./smoke/bin/news-fetch get --html rich_article.html --json https://www.example.com/news/x > out.json
+          ./smoke/bin/python - <<'EOF'
+          import json
+          import newsfetch
+
+          assert "site-packages" in newsfetch.__file__, newsfetch.__file__
+          data = json.load(open("out.json", encoding="utf-8"))
+          assert data["title"] == "City Council Approves Transit Plan", data["title"]
+          assert data["confidence"]["overall"] > 0.5, data["confidence"]
+          print("wheel OK:", newsfetch.__version__, data["title"])
+          EOF

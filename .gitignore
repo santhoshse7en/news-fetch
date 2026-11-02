@@ -12,3 +12,4 @@ venv/
 .DS_Store
 .news-fetch-cache.sqlite
 *.sqlite
+.coverage
