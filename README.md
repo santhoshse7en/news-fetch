@@ -2,11 +2,11 @@
 [![Downloads](https://pepy.tech/badge/news-fetch/month)](https://pepy.tech/project/news-fetch)
 [![Python versions](https://img.shields.io/pypi/pyversions/news-fetch.svg?style=flat-square)](https://pypi.org/project/news-fetch)
 [![License](https://img.shields.io/pypi/l/news-fetch.svg?style=flat-square)](https://pypi.org/project/news-fetch/)
-[![CI](https://img.shields.io/github/actions/workflow/status/santhoshse7en/news-fetch/ci.yml?style=flat-square)](https://github.com/santhoshse7en/news-fetch/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/santhoshse7en/news-fetch/tests.yml?branch=master&style=flat-square&label=tests)](https://github.com/santhoshse7en/news-fetch/actions/workflows/tests.yml)
 
 # news-fetch
 
-**Python news scraper & article extractor** — extract title, text, authors, date, image, and publisher from any news URL. No API key. Confidence scores included.
+**Python news scraper & article extractor** — extract title, text, Markdown, authors, date, image, and publisher from any news URL. No API key. Confidence scores included.
 
 > **Fetch news. Know why it worked.**
 
@@ -20,6 +20,7 @@ from newsfetch import fetch
 article = fetch("https://www.thehindu.com/...")
 print(article.title)
 print(article.text)
+print(article.markdown)             # body with headings, lists, links, images
 print(article.authors)
 print(article.published_at)
 print(article.image)
@@ -30,6 +31,7 @@ print(article.content_source)       # e.g. json-ld.articleBody
 ```bash
 news-fetch https://example.com/article
 news-fetch https://example.com/article --json
+news-fetch https://example.com/article --markdown
 news-fetch batch urls.txt -o articles.jsonl
 ```
 
@@ -42,13 +44,15 @@ A **lightweight alternative** to newspaper3k / newspaper4k / trafilatura wrapper
 | Feature | news-fetch |
 | --- | :---: |
 | News article extraction (title, body, authors, date, image) | ✅ |
+| Markdown body output for RAG / LLM pipelines (+ optional cleaned HTML) | ✅ |
 | Confidence scores + extraction provenance | ✅ |
-| Bulk scraping (`fetch_many` / `fetch_iter` / CLI JSONL) | ✅ |
+| Bulk scraping (`fetch_many` / `fetch_results` / CLI JSONL) with per-URL errors | ✅ |
 | Proxy + proxy rotation for thousands of URLs | ✅ |
 | RSS / sitemap article discovery | ✅ |
 | Async (`pip install news-fetch[async]`) | ✅ |
 | Optional browser render (`pip install news-fetch[browser]`) | ✅ |
-| Disk cache + robots.txt respect | ✅ |
+| Disk cache + RFC 9309 robots.txt | ✅ |
+| Response size limits, hardened XML parsing | ✅ |
 | No API key / no account | ✅ |
 | Small deps (`lxml`, `requests`, `python-dateutil`, `cssselect`) | ✅ |
 
@@ -63,15 +67,6 @@ pip install news-fetch[browser]   # Playwright fallback (then: playwright instal
 ```
 
 **Requirements:** Python 3.11+
-
-### Development
-
-```bash
-uv sync                 # creates .venv with the package + dev dependency group (uv.lock)
-uv run pytest
-uv run ruff check .
-uv build                # sdist + wheel into dist/
-```
 
 ---
 
@@ -94,6 +89,27 @@ from newsfetch import extract
 article = extract(html_bytes, url="https://example.com/story")
 ```
 
+### Markdown and HTML output
+
+`article.markdown` is always filled. It is rendered from the article body's DOM node, so it keeps
+headings, nested lists, links, images with captions, blockquotes, fenced code and tables; when the
+body only exists as text (for example JSON-LD `articleBody` with no matching node) it falls back to
+plain paragraphs. `article.sources["markdown"]` tells you which path was used.
+
+```python
+article = fetch(url)
+print(article.markdown)
+# ## Key points
+#
+# Read the [full **report**](https://example.com/report.pdf) …
+#
+# - First point
+# - Second point
+
+article = fetch(url, include_html=True)
+print(article.html)   # cleaned body HTML: no scripts, nav, share widgets or tracking attributes
+```
+
 ### Bulk scraping + proxies
 
 ```python
@@ -111,8 +127,8 @@ for url, article in fetch_iter(urls, max_workers=16):
         print(article.title)
 ```
 
-Need to know *why* a URL failed? `fetch_results` / `iter_results` return a `FetchResult`
-per URL instead of `None`:
+`fetch_many` / `fetch_iter` return `None` for failed URLs. To know *why* a URL failed, use
+`fetch_results` / `iter_results`, which return a `FetchResult` per URL:
 
 ```python
 from newsfetch import fetch_results
@@ -125,6 +141,9 @@ for result in fetch_results(urls, max_workers=20):
 # result.unwrap() returns the article or raises the captured error; result.to_dict() is JSON-ready
 ```
 
+`NewsFetcher` has the same methods (`fetch_result`, `fetch_results`, `iter_results`) when you want to
+reuse one configured client.
+
 ### Strict mode (production pipelines)
 
 ```python
@@ -136,6 +155,9 @@ except LowConfidenceExtractionError as e:
     print(e.failed_fields, e.confidence.overall)
 ```
 
+`strict=True` requires title and content confidence ≥ 0.6. Tune it with `min_confidence`,
+`min_content_confidence`, `min_title_confidence`, or `require_article_page=True`.
+
 ### Discovery (RSS / sitemaps)
 
 ```python
@@ -144,6 +166,9 @@ from newsfetch import discover
 for item in discover("https://www.bbc.com", limit=10):
     print(item["url"], item.get("title"))
 ```
+
+Discovery reads `Sitemap:` lines in robots.txt, feeds linked from the homepage, and common sitemap
+paths. `NewsFetcher(config).discover(site)` reuses the fetcher's user agent, proxies and limits.
 
 ### Async
 
@@ -155,20 +180,27 @@ articles = await fetch_many_async(urls, max_concurrency=50, proxies=PROXIES)
 results = await fetch_results_async(urls, max_concurrency=50)   # list[FetchResult]
 ```
 
+Requires `pip install news-fetch[async]`.
+
 ### CLI
 
 ```bash
-news-fetch https://example.com/article
+news-fetch https://example.com/article              # same as: news-fetch get URL
 news-fetch get URL --json
-news-fetch get URL --markdown        # article body as Markdown
-news-fetch batch urls.txt -o out.jsonl --workers 20   # failed URLs get {"url", "error": {type, message, status}}
-news-fetch discover https://www.theguardian.com --limit 10
+news-fetch get URL --markdown                       # article body as Markdown
+news-fetch get --html page.html https://example.com/a   # extract a saved page, no network
+news-fetch batch urls.txt -o out.jsonl --workers 20 --proxy http://p1:8080 --delay 0.1
+news-fetch discover https://www.theguardian.com --limit 10 --json
 ```
 
-### Cache / robots / browser
+`batch` streams one JSON object per URL. Failed URLs are written as
+`{"url": ..., "error": {"type", "message", "status"}}`, a `N ok, M failed` summary goes to stderr,
+and the exit code is 1 only when no URL succeeded.
+
+### Cache / robots / browser / size limits
 
 ```python
-from newsfetch import fetch, Config, NewsFetcher
+from newsfetch import fetch
 
 fetch(url, cache=True, respect_robots=True)
 fetch(url, render=True)                      # needs news-fetch[browser]
@@ -178,6 +210,7 @@ fetch(url, max_bytes=2 * 1024 * 1024)        # cap response size (default 10 MiB
 
 `respect_robots=True` follows [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309): wildcard rules,
 longest match wins, and if robots.txt is unreachable (5xx / network error) the fetch is refused.
+Response bodies are capped *after* decompression, so compressed "bombs" are rejected too.
 
 ### Custom strategy plugin
 
@@ -192,18 +225,106 @@ fetcher = NewsFetcher()
 fetcher.register_strategy(CallableStrategy("custom", my_strategy))
 ```
 
+### Debugging an extraction
+
+```python
+article = fetch(url, debug=True)
+article.sources                     # {"title": "og:title", "text": "json-ld.articleBody", ...}
+article.extraction.content          # winning strategy, score, confidence, candidate count, agreements
+article.trace.strategies_tried      # ["json-ld", "opengraph", "meta", "semantic", "dom", ...]
+article.trace.candidates            # every candidate considered, with the selected ones marked
+```
+
 ---
+
+## Configuration
+
+Every option can be passed as a keyword to `fetch`, `extract`, `fetch_many`, `fetch_results`, … or
+set on a `Config` for `NewsFetcher(Config(...))`.
+
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `timeout` | `15.0` | Request timeout (seconds) |
+| `retries` | `2` | Retries for connection errors, 429 and 5xx |
+| `max_bytes` | `10 MiB` | Max decompressed response size; `None` / `0` = unlimited |
+| `user_agent` / `headers` | `news-fetch/1.1 (+…)` / `{}` | Request identity and extra headers |
+| `proxy` / `proxies` / `rotate_proxies` | `None` / `None` / `True` | One proxy, or a pool rotated round-robin |
+| `max_workers` / `request_delay` | `8` / `0.0` | Bulk concurrency and per-request delay |
+| `include_html` | `False` | Fill `article.html` with cleaned body HTML |
+| `strict` / `min_confidence` | `False` / `0.0` | Raise `LowConfidenceExtractionError` below thresholds |
+| `respect_robots` | `False` | Check robots.txt (RFC 9309) before fetching |
+| `cache` / `cache_path` / `cache_ttl` | `False` / `.news-fetch-cache.sqlite` / `86400` | SQLite page cache |
+| `render` / `browser_fallback` | `False` / `False` | Playwright rendering (always / only on low confidence) |
+| `language` | `None` | Fallback language when the page declares none |
+| `debug` | `False` | Attach `article.trace` |
+
+## Errors
+
+All exceptions derive from `NewsFetchError`:
+
+- `FetchError` — HTTP or transport failure (`.url`, `.status`), robots.txt refusal, oversized response
+- `ParseError` — the document could not be parsed
+- `ExtractionError` — no title or text could be extracted
+  - `LowConfidenceExtractionError` — strict-mode gate failed (`.confidence`, `.failed_fields`, `.article`)
 
 ## Article fields
 
-`url` · `canonical_url` · `title` · `description` · `text` · `markdown` · `html` · `authors` · `published_at` · `modified_at` · `publisher` · `language` · `image` · `keywords` · `section` · `summary` · `word_count` · `reading_time_minutes` · `page_type` · `is_article` · `confidence` · `extraction` · `sources`
+| Field | Description |
+| --- | --- |
+| `url`, `canonical_url` | Requested / final URL and canonical URL (tracking params stripped) |
+| `title`, `description` | Headline and summary/standfirst |
+| `text` | Body as plain paragraphs |
+| `markdown` | Body as Markdown (always filled when there is body text) |
+| `html` | Cleaned body HTML (only with `include_html=True`) |
+| `authors`, `publisher`, `section` | Bylines, publication, section/category |
+| `published_at`, `modified_at` | Timezone-aware `datetime`s |
+| `language` | Primary language subtag (`en`, `de`, `fil`, …) |
+| `image`, `images` | Lead image URL |
+| `keywords`, `summary` | Page keywords (or frequency-based), lead-sentence summary |
+| `word_count`, `reading_time_minutes` | Body length |
+| `page_type`, `is_article` | `article`, `homepage`, `category`, `live_blog`, `video`, `opinion`, … |
+| `confidence` | Per-field and `overall` scores (0.0–1.0) |
+| `sources`, `extraction` | Which strategy produced each field, and per-field evidence |
+| `trace` | Full candidate trace (only with `debug=True`) |
 
 ```python
-article.markdown   # body as Markdown: headings, lists, links, images, quotes, code, tables (always set)
-article.html       # cleaned body HTML; only with fetch(url, include_html=True)
 article.to_dict()
-article.to_json()
+article.to_json(indent=2)
 ```
+
+## Migrating from news-fetch ≤ 0.4
+
+The old `newsfetch.news.Newspaper` class still works but is deprecated:
+
+```python
+# before
+from newsfetch.news import Newspaper
+news = Newspaper(url=url)
+news.headline, news.article, news.date_publish
+
+# now
+from newsfetch import fetch
+article = fetch(url)
+article.title, article.text, article.published_at
+```
+
+---
+
+## Contributing
+
+Development uses [uv](https://docs.astral.sh/uv/) (Python 3.11+):
+
+```bash
+uv sync                 # .venv with the package + dev dependency group, pinned by uv.lock
+uv run pytest
+uv run ruff check .
+uv run python benchmarks/run_benchmark.py
+uv build                # sdist + wheel into dist/
+```
+
+CI runs ruff, tests on Python 3.11–3.14 (Linux, plus macOS), the lowest supported dependency
+versions, and a smoke test of the built wheel. Please add a regression test with bug fixes and an
+entry in [CHANGELOG.md](CHANGELOG.md). See the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
 

@@ -1,8 +1,20 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
+All notable changes to this project are documented in this file. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
+[Semantic Versioning](https://semver.org/).
 
-## [1.1.0]
+## [1.1.0] - Unreleased
+
+### Upgrade notes
+- Python 3.11 or newer is required.
+- With `respect_robots=True`, an unreachable robots.txt (5xx, 429, network error) now blocks the fetch.
+- Responses larger than 10 MiB (after decompression) raise `FetchError`; raise or disable `max_bytes` if needed.
+- Dates without a full year, month and day are no longer guessed; `published_at` may be `None` where it
+  used to hold a made-up date.
+- Language codes keep their full primary subtag (`fil`, `yue`), not always two letters.
+- CLI `batch` error rows changed from `"error": true` to an object.
+- `pip install news-fetch[dev]` no longer exists; use `uv sync` (see the README's Contributing section).
 
 ### Added
 - `Config.max_bytes` (default 10 MiB): response bodies are streamed and capped after decompression
@@ -19,6 +31,7 @@ All notable changes to this project are documented in this file.
   only exists as text (e.g. JSON-LD `articleBody` with no matching node). `sources["markdown"]` says which.
 - `Article.html` is now filled with cleaned body HTML when `Config(include_html=True)`.
 - CLI: `news-fetch get --markdown`.
+- `HttpClient.get(..., max_bytes=, truncate=)` per-call size overrides.
 - CI test workflow: Python 3.11–3.14 (+ macOS), lowest-dependency job, wheel smoke test, ruff;
   Dependabot for SHA-pinned actions.
 
