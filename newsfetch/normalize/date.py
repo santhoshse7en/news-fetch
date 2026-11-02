@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from dateutil import parser as date_parser
 
@@ -33,7 +33,7 @@ def parse_date(value: str | None) -> datetime | None:
     if dt.date() != check.date():
         return None
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt
 
 
@@ -46,7 +46,7 @@ def date_from_url(url: str) -> datetime | None:
             int(match.group("y")),
             int(match.group("m")),
             int(match.group("d")),
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         )
     except ValueError:
         return None
