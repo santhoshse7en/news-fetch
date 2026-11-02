@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from lxml.html import tostring
 
 from newsfetch.config import Config
@@ -288,10 +286,8 @@ class Extractor:
         if cfg.require_article_page and not article.is_article:
             failed.append("page_type")
 
+        uniq: list[str] = []
         seen: set[str] = set()
-        uniq = [f for f in failed if not (f in seen or seen.add(f))]  # type: ignore[func-returns-value]
-        uniq = []
-        seen = set()
         for name in failed:
             if name not in seen:
                 seen.add(name)
@@ -305,6 +301,3 @@ class Extractor:
                 failed_fields=uniq,
                 article=article,
             )
-
-    def extract_from_nodes(self, *args: Any, **kwargs: Any) -> Article:
-        return self.extract(*args, **kwargs)

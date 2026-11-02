@@ -45,3 +45,26 @@ def test_homepage_not_article():
     html = (FIXTURES / "homepage_like.html").read_text(encoding="utf-8")
     article = extract(html, url="https://news.example.com/")
     assert article.is_article is False or article.page_type == "homepage"
+
+
+def test_iter_fetch_stops_on_early_exit(monkeypatch):
+    import threading
+    import time
+
+    from newsfetch.api import NewsFetcher
+
+    calls = []
+    lock = threading.Lock()
+
+    def slow_fetch(self, url, html=None):
+        with lock:
+            calls.append(url)
+        time.sleep(0.05)
+        return None
+
+    monkeypatch.setattr(NewsFetcher, "fetch", slow_fetch)
+    fetcher = NewsFetcher()
+    gen = fetcher.iter_fetch([f"https://example.com/{i}" for i in range(50)], max_workers=2)
+    next(gen)
+    gen.close()
+    assert len(calls) < 50
