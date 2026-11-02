@@ -14,6 +14,7 @@ from newsfetch.discover import discover as discover_site
 from newsfetch.errors import ExtractionError, FetchError, LowConfidenceExtractionError
 from newsfetch.extract.pipeline import Extractor
 from newsfetch.models.article import Article
+from newsfetch.models.result import FetchResult
 from newsfetch.strategies.plugin import ExtractionStrategy
 
 
@@ -99,6 +100,55 @@ class NewsFetcher:
             raise ExtractionError(f"Could not extract article content from {final_url}")
         return article
 
+    def fetch_result(self, url: str, *, html: str | bytes | None = None) -> FetchResult:
+        """Like :meth:`fetch`, but never raises: failures are captured in ``FetchResult.error``."""
+        try:
+            return FetchResult(url, article=self.fetch(url, html=html))
+        except Exception as exc:
+            return FetchResult(url, error=exc)
+
+    def fetch_results(
+        self,
+        urls: Sequence[str],
+        *,
+        max_workers: int | None = None,
+        on_progress: ProgressCallback | None = None,
+    ) -> list[FetchResult]:
+        """Fetch many URLs concurrently; one :class:`FetchResult` per URL, in input order.
+
+        ``on_progress(done, total, url, result)`` receives the ``FetchResult``.
+        """
+        workers = max_workers or self.config.max_workers
+        total = len(urls)
+        results: list[FetchResult | None] = [None] * total
+
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(self.fetch_result, u): i for i, u in enumerate(urls)}
+            for done, fut in enumerate(as_completed(futures), start=1):
+                result = fut.result()
+                results[futures[fut]] = result
+                if on_progress is not None:
+                    on_progress(done, total, result.url, result)
+
+        return [r for r in results if r is not None]
+
+    def iter_results(
+        self,
+        urls: Sequence[str],
+        *,
+        max_workers: int | None = None,
+    ) -> Iterator[FetchResult]:
+        """Yield a :class:`FetchResult` as each URL completes (unordered)."""
+        workers = max_workers or self.config.max_workers
+        pool = ThreadPoolExecutor(max_workers=workers)
+        try:
+            futures = [pool.submit(self.fetch_result, u) for u in urls]
+            for fut in as_completed(futures):
+                yield fut.result()
+        finally:
+            # Consumer may stop early; don't keep fetching the remaining URLs
+            pool.shutdown(wait=True, cancel_futures=True)
+
     def fetch_many(
         self,
         urls: Sequence[str],
@@ -106,29 +156,14 @@ class NewsFetcher:
         max_workers: int | None = None,
         on_progress: ProgressCallback | None = None,
     ) -> list[Article | None]:
-        """Fetch many URLs concurrently. Failures become ``None``."""
-        workers = max_workers or self.config.max_workers
-        total = len(urls)
-        results: list[Article | None] = [None] * total
+        """Fetch many URLs concurrently. Failures become ``None`` (see :meth:`fetch_results`)."""
+        progress = None
+        if on_progress is not None:
 
-        def _one(index: int, u: str) -> tuple[int, str, Article | None]:
-            try:
-                article = self.fetch(u)
-            except Exception:
-                article = None
-            return index, u, article
+            def progress(done: int, total: int, url: str, result: FetchResult) -> None:
+                on_progress(done, total, url, result.article)
 
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = [pool.submit(_one, i, u) for i, u in enumerate(urls)]
-            done = 0
-            for fut in as_completed(futures):
-                index, u, article = fut.result()
-                results[index] = article
-                done += 1
-                if on_progress is not None:
-                    on_progress(done, total, u, article)
-
-        return results
+        return [r.article for r in self.fetch_results(urls, max_workers=max_workers, on_progress=progress)]
 
     def iter_fetch(
         self,
@@ -136,23 +171,9 @@ class NewsFetcher:
         *,
         max_workers: int | None = None,
     ) -> Iterator[tuple[str, Article | None]]:
-        """Yield ``(url, article_or_none)`` as each request completes (unordered)."""
-        workers = max_workers or self.config.max_workers
-
-        def _one(u: str) -> tuple[str, Article | None]:
-            try:
-                return u, self.fetch(u)
-            except Exception:
-                return u, None
-
-        pool = ThreadPoolExecutor(max_workers=workers)
-        try:
-            futures = [pool.submit(_one, u) for u in urls]
-            for fut in as_completed(futures):
-                yield fut.result()
-        finally:
-            # Consumer may stop early; don't keep fetching the remaining URLs
-            pool.shutdown(wait=True, cancel_futures=True)
+        """Yield ``(url, article_or_none)`` as each request completes (see :meth:`iter_results`)."""
+        for result in self.iter_results(urls, max_workers=max_workers):
+            yield result.url, result.article
 
     def discover(self, site_url: str, *, limit: int | None = 50) -> list[dict]:
         return discover_site(site_url, limit=limit, client=self._client)
@@ -228,6 +249,31 @@ def fetch_iter(
         yield from fetcher.iter_fetch(urls, max_workers=max_workers)
 
 
+def fetch_results(
+    urls: Sequence[str],
+    *,
+    max_workers: int = 8,
+    on_progress: ProgressCallback | None = None,
+    **config_kwargs,
+) -> list[FetchResult]:
+    """Fetch many URLs; one :class:`FetchResult` (article or error) per URL, in input order."""
+    cfg = _config_from_kwargs(max_workers=max_workers, **config_kwargs)
+    with NewsFetcher(cfg) as fetcher:
+        return fetcher.fetch_results(urls, max_workers=max_workers, on_progress=on_progress)
+
+
+def iter_results(
+    urls: Sequence[str],
+    *,
+    max_workers: int = 8,
+    **config_kwargs,
+) -> Iterator[FetchResult]:
+    """Stream a :class:`FetchResult` per URL as each completes (unordered)."""
+    cfg = _config_from_kwargs(max_workers=max_workers, **config_kwargs)
+    with NewsFetcher(cfg) as fetcher:
+        yield from fetcher.iter_results(urls, max_workers=max_workers)
+
+
 def extract(
     html: str | bytes,
     url: str = "https://example.com/",
@@ -257,5 +303,7 @@ __all__ = [
     "fetch",
     "fetch_iter",
     "fetch_many",
+    "fetch_results",
+    "iter_results",
     "LowConfidenceExtractionError",
 ]

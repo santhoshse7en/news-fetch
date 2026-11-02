@@ -11,6 +11,7 @@ from newsfetch.config import Config, ProgressCallback
 from newsfetch.errors import ExtractionError, FetchError
 from newsfetch.extract.pipeline import Extractor
 from newsfetch.models.article import Article
+from newsfetch.models.result import FetchResult
 
 
 async def _read_limited(resp, limit: int | None) -> bytes:
@@ -104,7 +105,7 @@ async def fetch_async(
     return article
 
 
-async def fetch_many_async(
+async def fetch_results_async(
     urls: Sequence[str],
     *,
     max_concurrency: int = 8,
@@ -113,8 +114,11 @@ async def fetch_many_async(
     request_delay: float | None = None,
     on_progress: ProgressCallback | None = None,
     **config_kwargs,
-) -> list[Article | None]:
-    """Fetch many URLs concurrently with asyncio + optional proxy pool."""
+) -> list[FetchResult]:
+    """Fetch many URLs concurrently; one :class:`FetchResult` per URL, in input order.
+
+    ``on_progress(done, total, url, result)`` receives the ``FetchResult``.
+    """
     try:
         import httpx
     except ImportError as exc:
@@ -134,9 +138,8 @@ async def fetch_many_async(
     rotator = config.proxy_rotator()
     sem = asyncio.Semaphore(max_concurrency)
     total = len(urls)
-    results: list[Article | None] = [None] * total
+    results: list[FetchResult | None] = [None] * total
     done = 0
-    lock = asyncio.Lock()
 
     client_kwargs = {
         "headers": config.request_headers(),
@@ -146,37 +149,60 @@ async def fetch_many_async(
         "max_redirects": config.max_redirects,
     }
 
+    async def _fetch(u: str) -> Article:
+        if config.request_delay > 0:
+            await asyncio.sleep(config.request_delay)
+        # Per-request client so proxy rotation works across httpx versions
+        async with httpx.AsyncClient(
+            **client_kwargs,
+            proxy=_pick_proxy(config, rotator),
+        ) as client, client.stream("GET", u) as resp:
+            if resp.status_code >= 400:
+                raise FetchError(
+                    f"HTTP {resp.status_code} for {u}",
+                    url=str(resp.url),
+                    status=resp.status_code,
+                )
+            body = await _read_limited(resp, config.max_bytes)
+            final_url = str(resp.url)
+        article = extractor.extract(body, final_url)
+        if not article.title and not article.text:
+            raise ExtractionError(f"Could not extract article content from {final_url}")
+        return article
+
     async def _one(index: int, u: str) -> None:
         nonlocal done
         async with sem:
-            article: Article | None = None
             try:
-                if config.request_delay > 0:
-                    await asyncio.sleep(config.request_delay)
-                # Per-request client so proxy rotation works across httpx versions
-                async with httpx.AsyncClient(
-                    **client_kwargs,
-                    proxy=_pick_proxy(config, rotator),
-                ) as client, client.stream("GET", u) as resp:
-                    if resp.status_code >= 400:
-                        raise FetchError(
-                            f"HTTP {resp.status_code} for {u}",
-                            url=str(resp.url),
-                            status=resp.status_code,
-                        )
-                    body = await _read_limited(resp, config.max_bytes)
-                    final_url = str(resp.url)
-                article = extractor.extract(body, final_url)
-                if not article.title and not article.text:
-                    article = None
-            except Exception:
-                article = None
-            results[index] = article
-            async with lock:
-                done += 1
-                current = done
-            if on_progress is not None:
-                on_progress(current, total, u, article)
+                result = FetchResult(u, article=await _fetch(u))
+            except httpx.HTTPError as exc:
+                result = FetchResult(u, error=FetchError(f"Failed to fetch URL: {exc}", url=u))
+            except Exception as exc:
+                result = FetchResult(u, error=exc)
+        results[index] = result
+        done += 1  # single event loop thread: no lock needed
+        if on_progress is not None:
+            on_progress(done, total, u, result)
 
-    await asyncio.gather(*(_one(i, u) for i, u in enumerate(urls)))
-    return results
+    async with asyncio.TaskGroup() as tg:
+        for i, u in enumerate(urls):
+            tg.create_task(_one(i, u))
+    return [r for r in results if r is not None]
+
+
+async def fetch_many_async(
+    urls: Sequence[str],
+    *,
+    max_concurrency: int = 8,
+    on_progress: ProgressCallback | None = None,
+    **kwargs,
+) -> list[Article | None]:
+    """Fetch many URLs concurrently. Failures become ``None`` (see :func:`fetch_results_async`)."""
+    progress = None
+    if on_progress is not None:
+
+        def progress(done: int, total: int, url: str, result: FetchResult) -> None:
+            on_progress(done, total, url, result.article)
+
+    results = await fetch_results_async(urls, max_concurrency=max_concurrency, on_progress=progress, **kwargs)
+    return [r.article for r in results]
