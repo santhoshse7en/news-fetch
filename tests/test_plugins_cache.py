@@ -28,3 +28,19 @@ def test_disk_cache(tmp_path):
     cache.set("https://example.com/x", b"<html>hi</html>")
     assert cache.get("https://example.com/x") == b"<html>hi</html>"
     cache.close()
+
+
+def test_disk_cache_concurrent_threads(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+
+    cache = DiskCache(tmp_path / "c.sqlite", ttl=60)
+
+    def worker(i):
+        for j in range(50):
+            url = f"https://example.com/{i}/{j}"
+            cache.set(url, b"<html>x</html>")
+            assert cache.get(url) == b"<html>x</html>"
+
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        list(pool.map(worker, range(16)))  # re-raises any sqlite InterfaceError
+    cache.close()

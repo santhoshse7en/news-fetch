@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from newsfetch.detect.language import normalize_language
 from newsfetch.parser.html import Document
 from newsfetch.strategies.base import Candidate
 
@@ -37,9 +38,9 @@ def extract_opengraph(doc: Document) -> dict[str, list[Candidate]]:
     if author and not author.startswith("http"):
         out["authors"].append(Candidate([author], "article:author", 0.7))
 
-    locale = doc.meta_content(property="og:locale")
+    locale = normalize_language(doc.meta_content(property="og:locale"))
     if locale:
-        out["language"].append(Candidate(locale.replace("_", "-")[:2].lower(), "og:locale", 0.65))
+        out["language"].append(Candidate(locale, "og:locale", 0.65))
 
     for field, (name, score) in _TWITTER_MAP.items():
         value = doc.meta_content(name=name)
