@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 import re
-from collections.abc import Iterable
 
 from lxml.html import HtmlElement
 
@@ -179,14 +178,3 @@ def strip_boilerplate_nodes(root: HtmlElement) -> None:
             if parent is not None:
                 parent.remove(node)
 
-
-def iter_images_near(node: HtmlElement) -> Iterable[str]:
-    for img in node.xpath(".//img"):
-        src = img.get("src") or img.get("data-src") or img.get("data-original")
-        if src and not src.startswith("data:"):
-            yield src
-        srcset = img.get("srcset")
-        if srcset:
-            first = srcset.split(",")[0].strip().split(" ")[0]
-            if first and not first.startswith("data:"):
-                yield first

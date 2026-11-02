@@ -7,8 +7,8 @@ from lxml.html import HtmlElement
 
 from newsfetch.errors import ParseError
 
-_LOWER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-_UPPER = "abcdefghijklmnopqrstuvwxyz"
+_UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+_LOWERCASE = "abcdefghijklmnopqrstuvwxyz"
 
 
 class Document:
@@ -31,7 +31,7 @@ class Document:
                     root = lhtml.fromstring(text)
             else:
                 root = lhtml.fromstring(content)
-        except Exception as exc:  # noqa: BLE001 — lxml raises varied parse errors
+        except Exception as exc:  # lxml raises varied parse errors
             raise ParseError(f"Failed to parse HTML: {exc}") from exc
 
         if root is None:
@@ -45,13 +45,15 @@ class Document:
     def css(self, selector: str) -> list[HtmlElement]:
         try:
             return list(self.root.cssselect(selector))
-        except Exception:  # noqa: BLE001
+        except ImportError:
+            raise  # missing cssselect must not look like "no matches"
+        except Exception:
             return []
 
     def xpath(self, expr: str) -> list:
         try:
             return list(self.root.xpath(expr))
-        except Exception:  # noqa: BLE001
+        except Exception:
             return []
 
     def meta_content(self, *, property: str | None = None, name: str | None = None) -> str | None:
@@ -60,14 +62,14 @@ class Document:
             if not nodes:
                 prop = property.lower()
                 nodes = self.xpath(
-                    f'//meta[translate(@property,"{_LOWER}","{_UPPER}")="{prop}"]'
+                    f'//meta[translate(@property,"{_UPPERCASE}","{_LOWERCASE}")="{prop}"]'
                 )
         elif name:
             nodes = self.css(f'meta[name="{name}"]')
             if not nodes:
                 key = name.lower()
                 nodes = self.xpath(
-                    f'//meta[translate(@name,"{_LOWER}","{_UPPER}")="{key}"]'
+                    f'//meta[translate(@name,"{_UPPERCASE}","{_LOWERCASE}")="{key}"]'
                 )
         else:
             return None

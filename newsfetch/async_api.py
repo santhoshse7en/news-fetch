@@ -5,16 +5,12 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Sequence
 
+from newsfetch.api import _config_from_kwargs
 from newsfetch.client.proxy import ProxyMap, ProxyRotator
 from newsfetch.config import Config, ProgressCallback
 from newsfetch.errors import ExtractionError, FetchError
 from newsfetch.extract.pipeline import Extractor
 from newsfetch.models.article import Article
-
-
-def _config_from_kwargs(**config_kwargs) -> Config:
-    fields = set(Config.__dataclass_fields__)
-    return Config(**{k: v for k, v in config_kwargs.items() if k in fields})
 
 
 def _pick_proxy(config: Config, rotator: ProxyRotator) -> str | None:

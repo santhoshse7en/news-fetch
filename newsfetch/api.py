@@ -69,7 +69,6 @@ class NewsFetcher:
                     from newsfetch.client.browser import render_html
 
                     html = render_html(url, timeout=self.config.timeout)
-                    final_url = url
                 else:
                     response = self._client.get(url)
                     html = response.content
@@ -113,7 +112,7 @@ class NewsFetcher:
         def _one(index: int, u: str) -> tuple[int, str, Article | None]:
             try:
                 article = self.fetch(u)
-            except (FetchError, ExtractionError, Exception):
+            except Exception:
                 article = None
             return index, u, article
 
@@ -141,13 +140,17 @@ class NewsFetcher:
         def _one(u: str) -> tuple[str, Article | None]:
             try:
                 return u, self.fetch(u)
-            except (FetchError, ExtractionError, Exception):
+            except Exception:
                 return u, None
 
-        with ThreadPoolExecutor(max_workers=workers) as pool:
+        pool = ThreadPoolExecutor(max_workers=workers)
+        try:
             futures = [pool.submit(_one, u) for u in urls]
             for fut in as_completed(futures):
                 yield fut.result()
+        finally:
+            # Consumer may stop early; don't keep fetching the remaining URLs
+            pool.shutdown(wait=True, cancel_futures=True)
 
     def discover(self, site_url: str, *, limit: int | None = 50) -> list[dict]:
         return discover_site(site_url, limit=limit, timeout=self.config.timeout)
