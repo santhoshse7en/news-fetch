@@ -1,15 +1,71 @@
+# Byte-compiled / native extensions
 __pycache__/
 *.py[cod]
-*.egg-info/
-.eggs/
+*$py.class
+*.so
+
+# Packaging / build output (uv build, setuptools)
 build/
 dist/
+wheels/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
+
+# Virtual environments (uv sync creates .venv; uv.lock IS committed)
 .venv/
 venv/
+env/
+ENV/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Test, coverage and tool caches
 .pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+.tox/
+.nox/
 .mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
 .ruff_cache/
-.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# news-fetch runtime artifacts (DiskCache default path and SQLite side files)
 .news-fetch-cache.sqlite
 *.sqlite
-.coverage
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Playwright (news-fetch[browser])
+playwright-report/
+test-results/
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Claude Code: personal local settings (shared .claude/ config stays trackable)
+.claude/settings.local.json
