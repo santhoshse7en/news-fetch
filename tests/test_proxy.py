@@ -73,3 +73,37 @@ def test_fetch_kwargs_accept_proxy(monkeypatch):
     article = api.fetch("https://example.com/a", proxy="http://127.0.0.1:8888")
     assert article.title == "t"
     assert seen["proxy"] == "http://127.0.0.1:8888"
+
+
+def test_http_retries_not_multiplied():
+    import socket
+    import threading
+
+    import pytest
+
+    from newsfetch.client.http import HttpClient
+    from newsfetch.config import Config
+    from newsfetch.errors import FetchError
+
+    server = socket.socket()
+    server.bind(("127.0.0.1", 0))
+    server.listen(20)
+    port = server.getsockname()[1]
+    accepted = []
+
+    def serve():
+        while True:
+            try:
+                conn, _ = server.accept()
+            except OSError:
+                return
+            accepted.append(1)
+            conn.close()  # drop without a response
+
+    threading.Thread(target=serve, daemon=True).start()
+    try:
+        with pytest.raises(FetchError):
+            HttpClient(Config(retries=2)).get(f"http://127.0.0.1:{port}/")
+    finally:
+        server.close()
+    assert len(accepted) == 3  # 1 try + 2 retries (was 9)

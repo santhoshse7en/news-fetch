@@ -33,8 +33,13 @@ class HttpClient:
     def __init__(self, config: Config | None = None) -> None:
         self.config = config or Config()
         self._session = requests.Session()
+        # urllib3 retries 5xx only; connection errors and 429 are retried by the loop in get(),
+        # otherwise the two layers multiply ((retries + 1) ** 2 attempts)
         retry = Retry(
             total=max(0, self.config.retries),
+            connect=0,
+            read=0,
+            other=0,
             backoff_factor=0.3,
             status_forcelist=(500, 502, 503, 504),
             allowed_methods=frozenset({"GET", "HEAD"}),

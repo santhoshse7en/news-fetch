@@ -52,9 +52,11 @@ class Document:
 
     def xpath(self, expr: str) -> list:
         try:
-            return list(self.root.xpath(expr))
+            result = self.root.xpath(expr)
         except Exception:
             return []
+        # Scalar XPath results (string(), count(), …) must not be split into characters
+        return result if isinstance(result, list) else [result]
 
     def meta_content(self, *, property: str | None = None, name: str | None = None) -> str | None:
         if property:
