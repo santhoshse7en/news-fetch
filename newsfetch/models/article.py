@@ -74,6 +74,9 @@ class Article:
     subtitle: str | None = None
     description: str | None = None
     text: str | None = None
+    # Article body as Markdown (headings, lists, links, images, quotes, tables)
+    markdown: str | None = None
+    # Cleaned article body HTML; only filled when Config(include_html=True)
     html: str | None = None
     authors: list[str] = field(default_factory=list)
     published_at: datetime | None = None

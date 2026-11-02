@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from lxml.html import tostring
+import re
+
+from lxml.html import HtmlElement, tostring
 
 from newsfetch.config import Config
 from newsfetch.detect.language import detect_language
@@ -20,7 +22,9 @@ from newsfetch.nlp import extract_keywords, summarize
 from newsfetch.normalize.date import date_from_url, parse_date
 from newsfetch.normalize.text import normalize_whitespace
 from newsfetch.normalize.url import absolutize, canonicalize, domain_from_url
+from newsfetch.output import clean_body, text_to_html, text_to_markdown, to_html, to_markdown
 from newsfetch.parser.html import Document
+from newsfetch.strategies.base import Candidate
 from newsfetch.strategies.heuristic import extract_content_heuristic, strip_boilerplate_nodes
 from newsfetch.strategies.jsonld import extract_jsonld
 from newsfetch.strategies.meta import extract_meta
@@ -29,6 +33,35 @@ from newsfetch.strategies.plugin import ExtractionStrategy
 from newsfetch.strategies.semantic import extract_semantic
 
 _WORDS_PER_MINUTE = 200
+_WORD_RE = re.compile(r"\w+")
+
+
+def _node_of(candidate: Candidate) -> HtmlElement | None:
+    node = candidate.raw.get("node") if isinstance(candidate.raw, dict) else None
+    return node if isinstance(node, HtmlElement) else None
+
+
+def _covers(node: HtmlElement, text: str) -> bool:
+    """Does ``node`` contain (most of) the opening of ``text``? Used to find a DOM node for
+    content that came from a text-only source such as JSON-LD ``articleBody``."""
+    wanted = _WORD_RE.findall(text.lower())[:60]
+    if len(wanted) < 10:
+        return False
+    have = set(_WORD_RE.findall(node.text_content().lower()))
+    return sum(w in have for w in wanted) / len(wanted) >= 0.85
+
+
+def _body_node(source: str | None, candidates: list[Candidate], text: str) -> HtmlElement | None:
+    """DOM node behind the selected content: the winning candidate's own node, else the
+    highest-scoring candidate node that contains the same text."""
+    for cand in candidates:
+        if cand.source == source and _node_of(cand) is not None:
+            return _node_of(cand)
+    for cand in sorted(candidates, key=lambda c: c.score, reverse=True):
+        node = _node_of(cand)
+        if node is not None and _covers(node, text):
+            return node
+    return None
 
 
 def _merge_maps(*maps: dict) -> dict:
@@ -178,6 +211,22 @@ class Extractor:
             content_f.signals.setdefault("word_count", len(text.split()))
             content_f.signals.setdefault("paragraph_count", text.count("\n\n") + 1)
 
+        markdown: str | None = None
+        article_html: str | None = None
+        if text:
+            node = _body_node(content_f.source, merged.get("text", []), text)
+            cleaned = clean_body(node, base_url=url) if node is not None else None
+            markdown = to_markdown(cleaned) if cleaned is not None else None
+            if markdown:
+                sources["markdown"] = f"dom:{content_f.source}"
+                if self.config.include_html:
+                    article_html = to_html(cleaned)
+            else:
+                markdown = text_to_markdown(text)
+                sources["markdown"] = "text"
+                if self.config.include_html:
+                    article_html = text_to_html(text)
+
         if text and len(text) < self.config.min_text_length and trace is not None:
             trace.notes.append(f"text shorter than min_text_length={self.config.min_text_length}")
 
@@ -236,6 +285,8 @@ class Extractor:
             title=title,
             description=description,
             text=text,
+            markdown=markdown or None,
+            html=article_html,
             authors=authors,
             published_at=published_at,
             modified_at=modified_at,

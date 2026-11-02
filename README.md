@@ -160,6 +160,7 @@ results = await fetch_results_async(urls, max_concurrency=50)   # list[FetchResu
 ```bash
 news-fetch https://example.com/article
 news-fetch get URL --json
+news-fetch get URL --markdown        # article body as Markdown
 news-fetch batch urls.txt -o out.jsonl --workers 20   # failed URLs get {"url", "error": {type, message, status}}
 news-fetch discover https://www.theguardian.com --limit 10
 ```
@@ -195,9 +196,11 @@ fetcher.register_strategy(CallableStrategy("custom", my_strategy))
 
 ## Article fields
 
-`url` · `canonical_url` · `title` · `description` · `text` · `authors` · `published_at` · `modified_at` · `publisher` · `language` · `image` · `keywords` · `section` · `summary` · `word_count` · `reading_time_minutes` · `page_type` · `is_article` · `confidence` · `extraction` · `sources`
+`url` · `canonical_url` · `title` · `description` · `text` · `markdown` · `html` · `authors` · `published_at` · `modified_at` · `publisher` · `language` · `image` · `keywords` · `section` · `summary` · `word_count` · `reading_time_minutes` · `page_type` · `is_article` · `confidence` · `extraction` · `sources`
 
 ```python
+article.markdown   # body as Markdown: headings, lists, links, images, quotes, code, tables (always set)
+article.html       # cleaned body HTML; only with fetch(url, include_html=True)
 article.to_dict()
 article.to_json()
 ```
