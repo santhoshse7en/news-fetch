@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "news-fetch"
-version = "1.0.0"
+version = "1.1.0"
 description = "Python news scraper & article extractor — fetch news URLs, extract title/text/authors/date/image with confidence scores. Bulk scraping, proxies, RSS/sitemap discovery. No API key."
 readme = "README.md"
 license = "MIT"
