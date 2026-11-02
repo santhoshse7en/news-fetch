@@ -32,6 +32,8 @@ class Config:
     rotate_proxies: bool = True
     request_delay: float = 0.0
     retries: int = 2
+    # Cap on the (decompressed) response body; None or 0 disables the limit
+    max_bytes: int | None = 10 * 1024 * 1024
 
     # Confidence / strict mode
     strict: bool = False

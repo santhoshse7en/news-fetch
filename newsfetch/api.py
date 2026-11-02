@@ -35,7 +35,7 @@ class NewsFetcher:
             else None
         )
         self._robots = (
-            RobotsCache(self.config.user_agent, timeout=self.config.timeout)
+            RobotsCache(self.config.user_agent, client=self._client)
             if self.config.respect_robots
             else None
         )
@@ -53,8 +53,10 @@ class NewsFetcher:
         used_cache = False
 
         if html is None:
-            if self._robots is not None and not self._robots.allowed(url):
-                raise FetchError(f"Blocked by robots.txt: {url}", url=url, status=403)
+            if self._robots is not None:
+                decision = self._robots.check(url)
+                if not decision.allowed:
+                    raise FetchError(f"Blocked: {decision.reason}: {url}", url=url, status=403)
 
             if self._cache is not None:
                 cached = self._cache.get(url)
@@ -153,7 +155,7 @@ class NewsFetcher:
             pool.shutdown(wait=True, cancel_futures=True)
 
     def discover(self, site_url: str, *, limit: int | None = 50) -> list[dict]:
-        return discover_site(site_url, limit=limit, timeout=self.config.timeout)
+        return discover_site(site_url, limit=limit, client=self._client)
 
     def close(self) -> None:
         self._client.close()

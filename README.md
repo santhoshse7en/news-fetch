@@ -148,7 +148,11 @@ from newsfetch import fetch, Config, NewsFetcher
 fetch(url, cache=True, respect_robots=True)
 fetch(url, render=True)                      # needs news-fetch[browser]
 fetch(url, browser_fallback=True)            # retry with Playwright if confidence is low
+fetch(url, max_bytes=2 * 1024 * 1024)        # cap response size (default 10 MiB, None = no limit)
 ```
+
+`respect_robots=True` follows [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309): wildcard rules,
+longest match wins, and if robots.txt is unreachable (5xx / network error) the fetch is refused.
 
 ### Custom strategy plugin
 

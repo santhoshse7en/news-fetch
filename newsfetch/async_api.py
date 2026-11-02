@@ -13,6 +13,27 @@ from newsfetch.extract.pipeline import Extractor
 from newsfetch.models.article import Article
 
 
+async def _read_limited(resp, limit: int | None) -> bytes:
+    """Read a streamed httpx body, enforcing ``limit`` on decompressed bytes."""
+    declared = resp.headers.get("content-length")
+    if limit and declared and declared.isdigit() and int(declared) > limit:
+        raise FetchError(
+            f"Response too large ({declared} bytes > max_bytes={limit})",
+            url=str(resp.url),
+            status=resp.status_code,
+        )
+    buf = bytearray()
+    async for chunk in resp.aiter_bytes():
+        buf += chunk
+        if limit and len(buf) > limit:
+            raise FetchError(
+                f"Response too large (> max_bytes={limit})",
+                url=str(resp.url),
+                status=resp.status_code,
+            )
+    return bytes(buf)
+
+
 def _pick_proxy(config: Config, rotator: ProxyRotator) -> str | None:
     if not rotator:
         return None
@@ -63,15 +84,14 @@ async def fetch_async(
                 verify=config.verify_ssl,
                 max_redirects=config.max_redirects,
                 proxy=_pick_proxy(config, rotator),
-            ) as client:
-                resp = await client.get(url)
+            ) as client, client.stream("GET", url) as resp:
                 if resp.status_code >= 400:
                     raise FetchError(
                         f"HTTP {resp.status_code} for {url}",
                         url=str(resp.url),
                         status=resp.status_code,
                     )
-                html = resp.content
+                html = await _read_limited(resp, config.max_bytes)
                 url = str(resp.url)
         except FetchError:
             raise
@@ -137,15 +157,16 @@ async def fetch_many_async(
                 async with httpx.AsyncClient(
                     **client_kwargs,
                     proxy=_pick_proxy(config, rotator),
-                ) as client:
-                    resp = await client.get(u)
-                if resp.status_code >= 400:
-                    raise FetchError(
-                        f"HTTP {resp.status_code} for {u}",
-                        url=str(resp.url),
-                        status=resp.status_code,
-                    )
-                article = extractor.extract(resp.content, str(resp.url))
+                ) as client, client.stream("GET", u) as resp:
+                    if resp.status_code >= 400:
+                        raise FetchError(
+                            f"HTTP {resp.status_code} for {u}",
+                            url=str(resp.url),
+                            status=resp.status_code,
+                        )
+                    body = await _read_limited(resp, config.max_bytes)
+                    final_url = str(resp.url)
+                article = extractor.extract(body, final_url)
                 if not article.title and not article.text:
                     article = None
             except Exception:
