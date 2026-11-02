@@ -21,14 +21,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
         with:
-          python-version: "3.x"
+          enable-cache: false
 
+      # Ruff version comes from uv.lock, same as local `uv run ruff`
       - name: Ruff
-        run: |
-          python -m pip install --upgrade "ruff>=0.6"
-          ruff check --output-format=github .
+        run: uv run --locked ruff check --output-format=github .
 
   test:
     name: test (${{ matrix.os }}, py${{ matrix.python-version }})
@@ -37,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
         include:
           - os: macos-latest
             python-version: "3.14"
@@ -46,25 +45,21 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
+          enable-cache: false
 
-      # Dependencies come from pyproject.toml, so an undeclared/missing runtime
-      # dependency (e.g. cssselect) fails here instead of on a user's machine.
-      - name: Install package and dev dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install ".[dev]"
-          python -m pip check
+      # --locked fails if uv.lock is out of date with pyproject.toml. Runtime dependencies
+      # come from pyproject.toml, so a missing one (e.g. cssselect) fails the tests here.
+      - name: Install package and dev dependency group
+        run: uv sync --locked
 
       - name: Pytest
-        run: python -m pytest -q --cov=newsfetch --cov-report=term-missing:skip-covered
+        run: uv run --locked pytest -q --cov=newsfetch --cov-report=term-missing:skip-covered
 
       - name: Fixture benchmark
-        run: python benchmarks/run_benchmark.py
-        env:
-          PYTHONPATH: .
+        run: uv run --locked python benchmarks/run_benchmark.py
 
   lowest-deps:
     name: test (lowest dependency versions)
@@ -76,7 +71,8 @@ jobs:
 
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
         with:
-          python-version: "3.10"
+          python-version: "3.11"
+          enable-cache: false
 
       # Verifies the ">=" lower bounds in pyproject.toml are actually sufficient
       - name: Install minimum runtime dependencies
@@ -97,22 +93,22 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
         with:
-          python-version: "3.x"
+          python-version: "3.14"
+          enable-cache: false
 
       - name: Build sdist and wheel
         run: |
-          python -m pip install --upgrade build twine
-          python -m build
-          twine check --strict dist/*
+          uv build
+          uvx twine check --strict dist/*
 
       # Install the built wheel into a clean venv and run it from outside the
       # repo, so nothing is imported from the source tree.
       - name: Install wheel in a clean environment and run the CLI
         run: |
-          python -m venv "$RUNNER_TEMP/smoke"
-          "$RUNNER_TEMP/smoke/bin/python" -m pip install dist/*.whl
+          uv venv "$RUNNER_TEMP/smoke"
+          uv pip install --python "$RUNNER_TEMP/smoke/bin/python" dist/*.whl
           cp tests/fixtures/html/rich_article.html "$RUNNER_TEMP/"
           cd "$RUNNER_TEMP"
           ./smoke/bin/news-fetch --version

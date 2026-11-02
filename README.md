@@ -62,7 +62,16 @@ pip install news-fetch[async]     # httpx async fetch
 pip install news-fetch[browser]   # Playwright fallback (then: playwright install chromium)
 ```
 
-**Requirements:** Python 3.10+
+**Requirements:** Python 3.11+
+
+### Development
+
+```bash
+uv sync                 # creates .venv with the package + dev dependency group (uv.lock)
+uv run pytest
+uv run ruff check .
+uv build                # sdist + wheel into dist/
+```
 
 ---
 

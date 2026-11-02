@@ -1,4 +1,0 @@
-lxml>=5.0
-cssselect>=1.2
-requests>=2.32
-python-dateutil>=2.9
