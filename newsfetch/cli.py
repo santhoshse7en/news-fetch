@@ -88,10 +88,16 @@ def main(argv: list[str] | None = None) -> int:
         out_fp = None
         if args.output:
             out_fp = args.output.open("w", encoding="utf-8")
+        ok = failed = 0
         try:
             with NewsFetcher(cfg) as fetcher:
-                for url, article in fetcher.iter_fetch(urls):
-                    row = article.to_dict() if article is not None else {"url": url, "error": True}
+                for result in fetcher.iter_results(urls):
+                    if result.ok:
+                        ok += 1
+                        row = result.article.to_dict()
+                    else:
+                        failed += 1
+                        row = {"url": result.url, "error": result.error_dict()}
                     line = json.dumps(row, ensure_ascii=False)
                     if out_fp is not None:
                         out_fp.write(line + "\n")
@@ -101,7 +107,9 @@ def main(argv: list[str] | None = None) -> int:
         finally:
             if out_fp is not None:
                 out_fp.close()
-        return 0
+        print(f"{ok} ok, {failed} failed", file=sys.stderr)
+        # Partial failures are normal in bulk scraping; only fail when nothing succeeded
+        return 1 if failed and not ok else 0
 
     if args.command == "discover":
         for item in discover(args.site, limit=args.limit):

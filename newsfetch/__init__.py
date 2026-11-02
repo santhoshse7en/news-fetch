@@ -1,7 +1,16 @@
 """news-fetch — lightweight, independent, explainable news extraction for Python."""
 
-from newsfetch.api import NewsFetcher, discover, extract, fetch, fetch_iter, fetch_many
-from newsfetch.async_api import fetch_async, fetch_many_async
+from newsfetch.api import (
+    NewsFetcher,
+    discover,
+    extract,
+    fetch,
+    fetch_iter,
+    fetch_many,
+    fetch_results,
+    iter_results,
+)
+from newsfetch.async_api import fetch_async, fetch_many_async, fetch_results_async
 from newsfetch.config import Config
 from newsfetch.errors import (
     DiscoveryError,
@@ -11,7 +20,7 @@ from newsfetch.errors import (
     NewsFetchError,
     ParseError,
 )
-from newsfetch.models import Article, Confidence, Evidence, ExtractionReport, FieldExtraction
+from newsfetch.models import Article, Confidence, Evidence, ExtractionReport, FetchResult, FieldExtraction
 from newsfetch.strategies.plugin import CallableStrategy, ExtractionStrategy
 
 __version__ = "1.1.0"
@@ -27,6 +36,7 @@ __all__ = [
     "ExtractionReport",
     "ExtractionStrategy",
     "FetchError",
+    "FetchResult",
     "FieldExtraction",
     "LowConfidenceExtractionError",
     "NewsFetchError",
@@ -40,4 +50,7 @@ __all__ = [
     "fetch_iter",
     "fetch_many",
     "fetch_many_async",
+    "fetch_results",
+    "fetch_results_async",
+    "iter_results",
 ]

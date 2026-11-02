@@ -111,6 +111,20 @@ for url, article in fetch_iter(urls, max_workers=16):
         print(article.title)
 ```
 
+Need to know *why* a URL failed? `fetch_results` / `iter_results` return a `FetchResult`
+per URL instead of `None`:
+
+```python
+from newsfetch import fetch_results
+
+for result in fetch_results(urls, max_workers=20):
+    if result.ok:
+        print(result.article.title)
+    else:
+        print(result.url, type(result.error).__name__, result.status, result.error)
+# result.unwrap() returns the article or raises the captured error; result.to_dict() is JSON-ready
+```
+
 ### Strict mode (production pipelines)
 
 ```python
@@ -134,10 +148,11 @@ for item in discover("https://www.bbc.com", limit=10):
 ### Async
 
 ```python
-from newsfetch import fetch_async, fetch_many_async
+from newsfetch import fetch_async, fetch_many_async, fetch_results_async
 
 article = await fetch_async(url)
 articles = await fetch_many_async(urls, max_concurrency=50, proxies=PROXIES)
+results = await fetch_results_async(urls, max_concurrency=50)   # list[FetchResult]
 ```
 
 ### CLI
@@ -145,7 +160,7 @@ articles = await fetch_many_async(urls, max_concurrency=50, proxies=PROXIES)
 ```bash
 news-fetch https://example.com/article
 news-fetch get URL --json
-news-fetch batch urls.txt -o out.jsonl --workers 20
+news-fetch batch urls.txt -o out.jsonl --workers 20   # failed URLs get {"url", "error": {type, message, status}}
 news-fetch discover https://www.theguardian.com --limit 10
 ```
 
