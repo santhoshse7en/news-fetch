@@ -144,6 +144,38 @@ for result in fetch_results(urls, max_workers=20):
 `NewsFetcher` has the same methods (`fetch_result`, `fetch_results`, `iter_results`) when you want to
 reuse one configured client.
 
+### Proxies
+
+Any HTTP(S) proxy works, and SOCKS (`socks5://`) works with `pip install "requests[socks]"` (sync) or
+`"httpx[socks]"` (async). Pass one proxy, or a pool that is rotated round-robin:
+
+```python
+from newsfetch import fetch, fetch_results, Config, NewsFetcher
+
+article = fetch(url, proxy="http://user:pass@host:port")
+
+results = fetch_results(urls, proxies=[
+    "http://user:pass@p1:8080",
+    "http://user:pass@p2:8080",
+])
+
+# Separate proxies per scheme
+fetcher = NewsFetcher(Config(proxies={"http": "http://host:8080", "https": "http://host:8443"}))
+```
+
+```bash
+news-fetch get URL --proxy http://user:pass@host:port
+news-fetch batch urls.txt --proxy http://p1:8080 --proxy http://p2:8080 --delay 0.2
+```
+
+Proxies are useful for large crawls, region-specific editions, or keeping scraping traffic off your
+own IP. Keep `request_delay` and `respect_robots=True` on, and follow each site's terms.
+
+Need a proxy provider? [Proxy-Seller](REFERRAL_LINK) (*affiliate*) is one option; its proxy URLs plug
+straight into the settings above. Use code `COUPON_CODE` for a discount.
+*Disclosure: affiliate link. If you buy through it, the project receives a commission at no extra cost
+to you. See [Sponsors & partnerships](#sponsors--partnerships).*
+
 ### Strict mode (production pipelines)
 
 ```python
@@ -348,7 +380,11 @@ extractors and faster fixes — and they never change what the library does by d
 
 ### Current sponsors & partners
 
-None yet — [get in touch](#get-in-touch) to be the first. Using news-fetch in a product or a paper?
+| Partner | Type | Where it appears |
+| --- | --- | --- |
+| [Proxy-Seller](REFERRAL_LINK) | Affiliate (proxy provider) | [Proxies](#proxies) |
+
+Want to sponsor or partner? [Get in touch](#get-in-touch). Using news-fetch in a product or a paper?
 Open a pull request adding it to a "Used by" list here.
 
 ### Principles
