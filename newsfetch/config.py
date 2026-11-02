@@ -16,7 +16,7 @@ class Config:
     timeout: float = 15.0
     max_redirects: int = 10
     user_agent: str = (
-        "news-fetch/1.0 (+https://github.com/santhoshse7en/news-fetch)"
+        "news-fetch/1.1 (+https://github.com/santhoshse7en/news-fetch)"
     )
     headers: dict[str, str] = field(default_factory=dict)
     verify_ssl: bool = True

@@ -14,7 +14,7 @@ from newsfetch.errors import (
 from newsfetch.models import Article, Confidence, Evidence, ExtractionReport, FieldExtraction
 from newsfetch.strategies.plugin import CallableStrategy, ExtractionStrategy
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 __all__ = [
     "Article",
