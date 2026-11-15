@@ -356,10 +356,10 @@ uv build                # sdist + wheel into dist/
 ```
 
 CI runs ruff, tests on Python 3.11–3.14 (Linux, plus macOS), the lowest supported dependency
-versions, and a smoke test of the built wheel. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
-workflow, test conventions and release steps, and the [Code of Conduct](CODE_OF_CONDUCT.md).
+versions, and a smoke test of the built wheel. See [CONTRIBUTING.md](https://github.com/santhoshse7en/news-fetch/blob/master/CONTRIBUTING.md) for the
+workflow, test conventions and release steps, and the [Code of Conduct](https://github.com/santhoshse7en/news-fetch/blob/master/CODE_OF_CONDUCT.md).
 
-**Security issues:** please report them privately as described in [SECURITY.md](SECURITY.md), not in
+**Security issues:** please report them privately as described in [SECURITY.md](https://github.com/santhoshse7en/news-fetch/blob/master/SECURITY.md), not in
 public issues.
 
 ---
@@ -427,8 +427,8 @@ For bugs and feature requests, please use [GitHub Issues](https://github.com/san
 - **Docs:** https://santhoshse7en.github.io/newsfetch_doc/
 - **GitHub:** https://github.com/santhoshse7en/news-fetch
 - **Issues:** https://github.com/santhoshse7en/news-fetch/issues
-- **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+- **Changelog:** [CHANGELOG.md](https://github.com/santhoshse7en/news-fetch/blob/master/CHANGELOG.md)
 - **Partnerships:** [Sponsors & partnerships](#sponsors--partnerships)
-- **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md) · **Security:** [SECURITY.md](SECURITY.md)
+- **Contributing:** [CONTRIBUTING.md](https://github.com/santhoshse7en/news-fetch/blob/master/CONTRIBUTING.md) · **Security:** [SECURITY.md](https://github.com/santhoshse7en/news-fetch/blob/master/SECURITY.md)
 
 MIT License · Built for developers who need reliable Python news scraping without an API.
