@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from newsfetch.detect.language import normalize_language
 from newsfetch.parser.html import Document
 from newsfetch.strategies.base import Candidate
 
@@ -93,16 +94,15 @@ def extract_meta(doc: Document) -> dict[str, list[Candidate]]:
             if parts:
                 out["keywords"].append(Candidate(parts, f"meta:{name}", 0.55))
 
-    lang_attr = doc.xpath("string(//html/@lang)")
-    if isinstance(lang_attr, str) and lang_attr.strip():
-        out["language"].append(Candidate(lang_attr.strip()[:2].lower(), "html[lang]", 0.75))
+    for lang_attr in doc.xpath("//html/@lang")[:1]:
+        lang = normalize_language(str(lang_attr))
+        if lang:
+            out["language"].append(Candidate(lang, "html[lang]", 0.75))
 
     for node in doc.css('meta[http-equiv="content-language"]'):
-        content = node.get("content")
-        if content:
-            out["language"].append(
-                Candidate(content.strip()[:2].lower(), "meta.content-language", 0.7)
-            )
+        lang = normalize_language(node.get("content"))
+        if lang:
+            out["language"].append(Candidate(lang, "meta.content-language", 0.7))
             break
 
     for node in doc.css('link[rel="canonical"]'):

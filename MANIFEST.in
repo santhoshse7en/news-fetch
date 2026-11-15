@@ -1,0 +1,4 @@
+# Extra files for the sdist, so its test suite runs as-is (conftest + HTML fixtures)
+include CHANGELOG.md CONTRIBUTING.md SECURITY.md CODE_OF_CONDUCT.md
+recursive-include tests *.py *.html
+recursive-include benchmarks *.py *.json

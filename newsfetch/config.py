@@ -16,7 +16,7 @@ class Config:
     timeout: float = 15.0
     max_redirects: int = 10
     user_agent: str = (
-        "news-fetch/1.0 (+https://github.com/santhoshse7en/news-fetch)"
+        "news-fetch/1.1 (+https://github.com/santhoshse7en/news-fetch)"
     )
     headers: dict[str, str] = field(default_factory=dict)
     verify_ssl: bool = True
@@ -25,6 +25,8 @@ class Config:
     max_workers: int = 8
     strip_tracking_params: bool = True
     min_text_length: int = 50
+    # Fill Article.html with the cleaned body HTML (Article.markdown is always filled)
+    include_html: bool = False
 
     # Networking / scale
     proxy: str | ProxyMap | None = None
@@ -32,6 +34,8 @@ class Config:
     rotate_proxies: bool = True
     request_delay: float = 0.0
     retries: int = 2
+    # Cap on the (decompressed) response body; None or 0 disables the limit
+    max_bytes: int | None = 10 * 1024 * 1024
 
     # Confidence / strict mode
     strict: bool = False

@@ -6,6 +6,7 @@ import json
 import re
 from typing import Any
 
+from newsfetch.detect.language import normalize_language
 from newsfetch.parser.html import Document
 from newsfetch.strategies.base import Candidate
 
@@ -157,9 +158,9 @@ def extract_jsonld(doc: Document) -> dict[str, list[Candidate]]:
             if joined:
                 out["section"].append(Candidate(joined, "json-ld", 0.85))
 
-        lang = obj.get("inLanguage")
-        if isinstance(lang, str) and lang.strip():
-            out["language"].append(Candidate(lang.strip()[:2].lower(), "json-ld", 0.8))
+        lang = normalize_language(obj.get("inLanguage")) if isinstance(obj.get("inLanguage"), str) else None
+        if lang:
+            out["language"].append(Candidate(lang, "json-ld", 0.8))
 
         url = obj.get("mainEntityOfPage") or obj.get("url")
         if isinstance(url, dict):

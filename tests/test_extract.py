@@ -75,3 +75,18 @@ def test_extractor_config_min_length():
     cfg = Config(min_text_length=10, debug=True)
     article = Extractor(cfg).extract(_html("heuristic_only.html"), "https://example.com/x")
     assert article.text
+
+
+def test_language_from_html_lang_attribute():
+    body = "<p>" + "Das ist ein langer Satz mit vielen Wörtern und der Text geht weiter. " * 10 + "</p>"
+    html = f'<html lang="de-AT"><head><title>Ein Titel hier</title></head><body><article>{body}</article></body></html>'
+    article = extract(html, url="https://example.de/a")
+    assert article.language == "de"
+    assert article.sources.get("language") == "html[lang]"
+
+
+def test_document_xpath_scalar_not_split():
+    from newsfetch.parser.html import Document
+
+    doc = Document.from_html('<html lang="en-GB"><body><p>x</p></body></html>')
+    assert doc.xpath("string(//html/@lang)") == ["en-GB"]

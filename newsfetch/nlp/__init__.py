@@ -15,7 +15,8 @@ _STOPWORDS = {
 
 
 def extract_keywords(text: str, max_keywords: int = 10) -> list[str]:
-    words = re.findall(r"[A-Za-z][A-Za-z'-]{2,}", text.lower())
+    # Unicode letters (not just ASCII), so Cyrillic/Greek/Arabic/etc. text yields keywords too
+    words = re.findall(r"[^\W\d_][\w'-]{2,}", text.lower())
     counts = Counter(w for w in words if w not in _STOPWORDS)
     return [w for w, _ in counts.most_common(max_keywords)]
 

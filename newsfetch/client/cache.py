@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+import threading
 import time
 from pathlib import Path
 
@@ -14,6 +15,8 @@ class DiskCache:
     def __init__(self, path: str | Path = ".news-fetch-cache.sqlite", *, ttl: int = 86400) -> None:
         self.path = Path(path)
         self.ttl = ttl
+        # One connection is shared by fetch_many worker threads; sqlite3 objects aren't thread-safe
+        self._lock = threading.Lock()
         self._conn = sqlite3.connect(str(self.path), check_same_thread=False)
         self._conn.execute(
             """
@@ -33,28 +36,31 @@ class DiskCache:
 
     def get(self, url: str) -> bytes | None:
         key = self._key(url)
-        row = self._conn.execute(
-            "SELECT content, fetched_at FROM pages WHERE key = ?", (key,)
-        ).fetchone()
-        if not row:
-            return None
-        content, fetched_at = row
-        if self.ttl > 0 and (time.time() - fetched_at) > self.ttl:
-            self._conn.execute("DELETE FROM pages WHERE key = ?", (key,))
-            self._conn.commit()
-            return None
-        return content
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT content, fetched_at FROM pages WHERE key = ?", (key,)
+            ).fetchone()
+            if not row:
+                return None
+            content, fetched_at = row
+            if self.ttl > 0 and (time.time() - fetched_at) > self.ttl:
+                self._conn.execute("DELETE FROM pages WHERE key = ?", (key,))
+                self._conn.commit()
+                return None
+            return content
 
     def set(self, url: str, content: bytes) -> None:
         key = self._key(url)
-        self._conn.execute(
-            """
-            INSERT OR REPLACE INTO pages (key, url, content, fetched_at)
-            VALUES (?, ?, ?, ?)
-            """,
-            (key, url, content, time.time()),
-        )
-        self._conn.commit()
+        with self._lock:
+            self._conn.execute(
+                """
+                INSERT OR REPLACE INTO pages (key, url, content, fetched_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (key, url, content, time.time()),
+            )
+            self._conn.commit()
 
     def close(self) -> None:
-        self._conn.close()
+        with self._lock:
+            self._conn.close()

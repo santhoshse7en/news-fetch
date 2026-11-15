@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 import re
-from collections.abc import Iterable
 
 from lxml.html import HtmlElement
 
@@ -159,7 +158,7 @@ def extract_content_heuristic(doc: Document) -> list[Candidate[str]]:
             continue
         # Normalize score into 0.4–0.9 band for merging with other strategies
         norm = min(0.9, 0.45 + (score / 200.0))
-        results.append(Candidate(text, "heuristic.dom-score", norm, raw={"score": score}))
+        results.append(Candidate(text, "heuristic.dom-score", norm, raw={"score": score, "node": node}))
         break  # best only as primary; keep one strong candidate
 
     return results
@@ -179,14 +178,3 @@ def strip_boilerplate_nodes(root: HtmlElement) -> None:
             if parent is not None:
                 parent.remove(node)
 
-
-def iter_images_near(node: HtmlElement) -> Iterable[str]:
-    for img in node.xpath(".//img"):
-        src = img.get("src") or img.get("data-src") or img.get("data-original")
-        if src and not src.startswith("data:"):
-            yield src
-        srcset = img.get("srcset")
-        if srcset:
-            first = srcset.split(",")[0].strip().split(" ")[0]
-            if first and not first.startswith("data:"):
-                yield first
