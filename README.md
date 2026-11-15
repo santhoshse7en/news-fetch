@@ -171,8 +171,9 @@ news-fetch batch urls.txt --proxy http://p1:8080 --proxy http://p2:8080 --delay 
 Proxies are useful for large crawls, region-specific editions, or keeping scraping traffic off your
 own IP. Keep `request_delay` and `respect_robots=True` on, and follow each site's terms.
 
-Need a proxy provider? [Proxy-Seller](REFERRAL_LINK) (*affiliate*) is one option; its proxy URLs plug
-straight into the settings above. Use code `COUPON_CODE` for a discount.
+Need a proxy provider? [Proxy-Seller](https://proxy-seller.com/?partner=C83403E5A6424E45) (*affiliate*)
+is one option; its proxy URLs plug straight into the settings above. Use code `XLDPDU_067124` for a
+discount.
 *Disclosure: affiliate link. If you buy through it, the project receives a commission at no extra cost
 to you. See [Sponsors & partnerships](#sponsors--partnerships).*
 
@@ -382,7 +383,7 @@ extractors and faster fixes — and they never change what the library does by d
 
 | Partner | Type | Where it appears |
 | --- | --- | --- |
-| [Proxy-Seller](REFERRAL_LINK) | Affiliate (proxy provider) | [Proxies](#proxies) |
+| [Proxy-Seller](https://proxy-seller.com/?partner=C83403E5A6424E45) | Affiliate (proxy provider) | [Proxies](#proxies) |
 
 Want to sponsor or partner? [Get in touch](#get-in-touch). Using news-fetch in a product or a paper?
 Open a pull request adding it to a "Used by" list here.
