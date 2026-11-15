@@ -172,8 +172,9 @@ Proxies are useful for large crawls, region-specific editions, or keeping scrapi
 own IP. Keep `request_delay` and `respect_robots=True` on, and follow each site's terms.
 
 Need a proxy provider? [Proxy-Seller](https://proxy-seller.com/?partner=C83403E5A6424E45) (*affiliate*)
-is one option; its proxy URLs plug straight into the settings above. Use code `XLDPDU_067124` for a
-discount.
+is one option; its proxy URLs plug straight into the settings above. Sign up through
+[this link](https://proxy-seller.com/?partner=C83403E5A6424E45) and use promo code `SANTHOSHSE7EN`
+for up to 15% off.
 *Disclosure: affiliate link. If you buy through it, the project receives a commission at no extra cost
 to you. See [Sponsors & partnerships](#sponsors--partnerships).*
 
